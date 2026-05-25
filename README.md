@@ -1,2 +1,2 @@
 # english-speech
-it is for education 
+english presentation and speech practice
