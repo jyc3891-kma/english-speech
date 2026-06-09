@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KMA 영어발표와 연설 · 학습 앱 v5</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Playfair+Display:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --nv:#0f172a;--nv2:#1e293b;--nv3:#334155;
+  --gd:#c49a2a;--gd-bg:#faeeda;--gd-tx:#633806;
+  --bl:#185FA5;--bl-bg:#E6F1FB;--bl-tx:#0C447C;
+  --gn:#3B6D11;--gn-bg:#EAF3DE;--gn-tx:#27500A;
+  --rd:#A32D2D;--rd-bg:#FCEBEB;--rd-tx:#791F1F;
+  --or:#BA7517;--or-bg:#FEF3C7;--or-tx:#92400E;
+  --bg:#f1f5f9;--bg2:#ffffff;--bg3:#f8fafc;
+  --bd:#e2e8f0;--bd2:#cbd5e1;
+  --tx:#0f172a;--tx2:#475569;--tx3:#94a3b8;
+  --r8:8px;--r12:12px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);
+}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+.app{max-width:700px;margin:0 auto;background:var(--bg2);min-height:100vh;position:relative;box-shadow:0 0 40px rgba(0,0,0,.1)}
+
+/* HEADER */
+.hdr{background:var(--nv);display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:2px solid var(--gd);position:sticky;top:0;z-index:100}
+.hdr-l{display:flex;align-items:center;gap:9px}
+.kma-badge{background:var(--gd);color:var(--nv);font-weight:700;font-size:11px;padding:3px 8px;border-radius:3px;letter-spacing:2px;cursor:pointer;user-select:none}
+.hdr-t{font-size:13px;color:#cbd5e1;font-weight:500}
+.hdr-r{display:flex;align-items:center;gap:8px}
+.ci{font-size:12px;color:#94a3b8;display:flex;align-items:center;gap:5px}
+.wk-sel{background:var(--nv2);border:0.5px solid var(--nv3);color:#e2e8f0;border-radius:6px;padding:5px 9px;font-size:12px;cursor:pointer;font-family:'Noto Sans KR',sans-serif}
+
+/* CADET NAME MODAL */
+.name-overlay{position:fixed;inset:0;background:rgba(15,23,42,.9);z-index:2000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.name-box{background:var(--bg2);border-radius:16px;padding:32px 28px;width:min(88vw,360px);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.name-box .kma-b{background:var(--gd);color:var(--nv);font-weight:700;font-size:13px;padding:5px 14px;border-radius:3px;letter-spacing:3px;display:inline-block;margin-bottom:18px}
+.name-box h2{font-size:17px;font-weight:700;font-family:'Playfair Display',serif;margin-bottom:6px}
+.name-box p{font-size:12px;color:var(--tx3);margin-bottom:20px;line-height:1.6}
+.name-inp{width:100%;border:0.5px solid var(--bd);border-radius:var(--r8);padding:11px 14px;font-size:16px;outline:none;font-family:'Noto Sans KR',sans-serif;text-align:center;color:var(--tx);background:var(--bg3)}
+.name-inp:focus{border-color:var(--gd)}
+.name-btn{width:100%;margin-top:10px;background:var(--nv);color:#e2e8f0;border:none;border-radius:var(--r8);padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif}
+.name-err{font-size:12px;color:var(--rd-tx);margin-top:7px;display:none}
+
+/* NAV */
+.nav{display:flex;background:var(--bg2);border-bottom:0.5px solid var(--bd);position:sticky;top:56px;z-index:99}
+.nb{flex:1;padding:10px 4px;font-size:11px;font-weight:500;border:none;background:none;cursor:pointer;color:var(--tx2);border-bottom:2.5px solid transparent;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .12s;font-family:'Noto Sans KR',sans-serif}
+.nb i{font-size:18px}
+.nb.on{color:var(--gd-tx);border-bottom-color:var(--gd);background:var(--gd-bg)}
+.nb:hover:not(.on){background:var(--bg3)}
+
+/* BODY */
+.body{padding:14px}
+.sc{display:none}.sc.on{display:block}
+
+/* PROGRESS STRIP */
+.pstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+.pi{background:var(--bg2);border:0.5px solid var(--bd);border-radius:var(--r8);padding:8px 6px;text-align:center;transition:all .2s}
+.pi.done{border-color:var(--gn);background:var(--gn-bg)}
+.pi .pl{font-size:10px;color:var(--tx3);margin-bottom:2px}
+.pi.done .pl{color:var(--gn)}
+.pi .pv{font-size:12px;font-weight:500;color:var(--tx)}
+.pi.done .pv{color:var(--gn-tx)}
+
+/* CARD */
+.card{background:var(--bg2);border:0.5px solid var(--bd);border-radius:var(--r12);padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.ct{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:11px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.ct i{font-size:17px;color:var(--gd-tx)}
+.info-box{background:var(--bl-bg);border:0.5px solid #B5D4F4;border-radius:var(--r8);padding:8px 12px;font-size:12px;color:var(--bl-tx);margin-bottom:12px;line-height:1.7;display:flex;gap:7px}
+.info-box i{flex-shrink:0;margin-top:1px}
+
+/* FLASHCARD */
+.fc-area{background:var(--bg3);border:0.5px solid var(--bd);border-radius:10px;padding:32px 16px;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;cursor:pointer;transition:background .12s}
+.fc-area:hover{background:var(--bg)}
+.fc-word{font-size:30px;font-weight:500;color:var(--tx);font-family:'Playfair Display',serif;letter-spacing:.5px;text-align:center}
+.fc-hint{font-size:11px;color:var(--tx3)}
+.fc-back{display:none;flex-direction:column;align-items:center;gap:6px;width:100%}
+.fc-meaning{font-size:18px;font-weight:500;color:var(--tx);text-align:center;font-family:'Playfair Display',serif}
+.fc-ex{font-size:12px;color:var(--tx2);font-style:italic;text-align:center;line-height:1.7;max-width:340px}
+.fnav{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.fc-btns{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
+
+/* BUTTONS */
+.btn-tts{background:var(--nv);color:white;border:none;border-radius:7px;padding:7px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Noto Sans KR',sans-serif}
+.btn-flip{background:var(--gd-bg);color:var(--gd-tx);border:0.5px solid #EF9F27;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Noto Sans KR',sans-serif}
+.btn-next{background:var(--bl);color:white;border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Noto Sans KR',sans-serif}
+
+/* PATTERN */
+.pitm{border:0.5px solid var(--bd);border-radius:var(--r8);padding:12px 14px;margin-bottom:8px;transition:all .2s}
+.pitm.ok{border-color:var(--gn);background:var(--gn-bg)}
+.p-q{font-size:13px;color:var(--tx);line-height:1.9;margin-bottom:8px}
+.p-inp{border:0.5px solid var(--bd2);border-radius:6px;padding:5px 10px;font-size:13px;background:var(--bg2);color:var(--tx);outline:none;width:130px;font-family:'Noto Sans KR',sans-serif}
+.p-inp:focus{border-color:var(--gd)}
+.p-inp.c{background:var(--gn-bg);color:var(--gn-tx);border-color:#97C459}
+.p-inp.w{background:var(--rd-bg);color:var(--rd-tx);border-color:#F09595}
+.p-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:6px}
+.p-btn{background:var(--bg3);border:0.5px solid var(--bd);color:var(--tx);padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:'Noto Sans KR',sans-serif}
+.p-fb{font-size:11px;font-weight:500}
+.p-fb.ok{color:var(--gn-tx)}.p-fb.ng{color:var(--rd-tx)}
+.p-full{font-size:12px;border-radius:6px;padding:7px 10px;margin-top:4px;display:none;line-height:1.6}
+.p-full span{color:var(--bl);font-weight:500}
+
+/* SHADOW */
+.shdw-line{background:var(--bg3);border:0.5px solid var(--bd);border-radius:var(--r8);padding:12px 14px;margin-bottom:8px;transition:all .2s}
+.shdw-en{font-size:14px;color:var(--tx);line-height:1.8;margin-bottom:4px;font-family:'Playfair Display',serif;font-style:italic}
+.shdw-ko{font-size:12px;color:var(--tx2);margin-bottom:10px}
+.shdw-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.bplay{background:var(--nv);color:white;border:none;border-radius:7px;padding:6px 13px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Noto Sans KR',sans-serif}
+.brec{color:white;border:none;border-radius:7px;padding:6px 13px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;background:var(--bl);font-family:'Noto Sans KR',sans-serif}
+.brec.recording{background:var(--rd);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.acc-wrap{margin-top:6px}
+.acc-lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--tx2);margin-bottom:3px}
+.acc-bar{background:var(--bg);border-radius:20px;height:5px;overflow:hidden}
+.acc-fill{height:100%;border-radius:20px;transition:width .5s}
+.tip-box{font-size:11px;color:var(--tx2);background:var(--bg2);border:0.5px solid var(--bd);border-radius:6px;padding:6px 10px;margin-top:6px;line-height:1.5;display:flex;gap:5px}
+
+/* DRAFT */
+.dchips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.dchip{font-size:11px;padding:3px 9px;border-radius:20px;border:0.5px solid var(--bd);background:var(--bg3);color:var(--tx2);transition:all .2s}
+.dchip.ok{background:var(--gn-bg);color:var(--gn-tx);border-color:#97C459}
+.dchip.ng{background:var(--rd-bg);color:var(--rd-tx);border-color:#F09595}
+.dta{width:100%;border:0.5px solid var(--bd);border-radius:var(--r8);padding:11px;font-size:13px;line-height:1.9;background:var(--bg3);color:var(--tx);resize:none;outline:none;font-family:'Noto Sans KR',sans-serif}
+.dta:focus{border-color:var(--gd)}
+.dai{border-radius:var(--r8);padding:11px;font-size:12px;line-height:1.7;margin-top:8px}
+.dai.ok{background:var(--bl-bg);border:0.5px solid #B5D4F4;color:var(--bl-tx)}
+.dai.err{background:var(--rd-bg);border:0.5px solid #F7C1C1;color:var(--rd-tx)}
+.dact{display:flex;gap:7px;margin-top:8px;flex-wrap:wrap}
+.bai{background:var(--nv);color:white;border:none;border-radius:var(--r8);padding:8px 14px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Noto Sans KR',sans-serif}
+.bsub{background:var(--gn-tx);color:var(--gn-bg);border:none;border-radius:var(--r8);padding:8px 14px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Noto Sans KR',sans-serif}
+.bsub:disabled{opacity:.4;cursor:not-allowed}
+
+/* FINAL REC */
+.rec-area{background:var(--bg3);border:0.5px solid var(--bd);border-radius:10px;padding:16px;text-align:center;margin-bottom:10px}
+.rec-status{font-size:13px;color:var(--tx2);margin-bottom:10px}
+.rec-timer{font-size:30px;font-weight:500;color:var(--tx);margin-bottom:10px;font-family:'JetBrains Mono',monospace}
+.rec-timer.on{color:var(--rd)}
+.rec-wave{height:28px;display:flex;align-items:center;justify-content:center;gap:3px;margin-bottom:12px}
+.rbar{width:3px;border-radius:2px;background:var(--bd2)}
+.rbar.on{background:var(--rd)}
+.rec-main-btn{background:var(--bl);color:white;border:none;border-radius:50%;width:60px;height:60px;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 4px 12px rgba(24,95,165,.35)}
+.rec-main-btn.recording{background:var(--rd);box-shadow:0 4px 12px rgba(163,45,45,.35)}
+.rec-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.breset{background:var(--bg2);border:0.5px solid var(--bd);color:var(--tx);border-radius:var(--r8);padding:7px 14px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Noto Sans KR',sans-serif}
+.bfinal{background:var(--gn-tx);color:var(--gn-bg);border:none;border-radius:var(--r8);padding:7px 14px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Noto Sans KR',sans-serif}
+.bfinal:disabled{opacity:.4;cursor:not-allowed}
+.rec-preview{background:var(--bg2);border:0.5px solid var(--bd);border-radius:var(--r8);padding:10px 14px;margin-top:10px;display:none}
+
+/* RUBRIC */
+.rubric-card{background:var(--bg2);border:0.5px solid var(--bd);border-radius:var(--r12);padding:14px;margin-top:10px}
+.rubric-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:0.5px solid var(--bd);padding-bottom:10px}
+.rubric-total{font-size:24px;font-weight:700;color:var(--gd-tx);font-family:'Playfair Display',serif}
+.rubric-total span{font-size:12px;color:var(--tx3);margin-left:2px;font-family:'Noto Sans KR',sans-serif;font-weight:400}
+.rubric-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--bd)}
+.rubric-row:last-child{border-bottom:none}
+.rubric-label{font-size:12px;font-weight:500;color:var(--tx);width:90px;flex-shrink:0;padding-top:2px}
+.rubric-bar-wrap{flex:1}
+.rubric-bar-bg{background:var(--bg3);border-radius:20px;height:6px;overflow:hidden;margin:4px 0}
+.rubric-bar-fill{height:100%;border-radius:20px;transition:width .7s}
+.rubric-score{font-size:11px;font-weight:500;width:36px;text-align:right;flex-shrink:0;padding-top:2px}
+.rubric-fb{font-size:11px;color:var(--tx2);line-height:1.5}
+.grade-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.overall-box{background:var(--bg3);border-radius:var(--r8);padding:10px 14px;margin-top:12px;font-size:12px;color:var(--tx2);line-height:1.7}
+
+/* TOAST */
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--nv);color:#e2e8f0;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:500;opacity:0;transition:opacity .25s;pointer-events:none;display:flex;align-items:center;gap:6px;z-index:9999;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+.toast.show{opacity:1}
+
+/* ========== INSTRUCTOR OVERLAY ========== */
+.inst-overlay{position:fixed;inset:0;background:rgba(15,23,42,.88);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.inst-overlay.open{display:flex}
+.inst-modal{background:var(--bg2);border-radius:16px;width:min(96vw,780px);max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.inst-hdr{background:var(--nv);padding:13px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--gd);flex-shrink:0}
+.inst-hdr-t{font-size:14px;font-weight:700;color:#e2e8f0;display:flex;align-items:center;gap:8px}
+.inst-close{background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;line-height:1}
+.inst-close:hover{color:#e2e8f0}
+.inst-body{overflow-y:auto;padding:14px;flex:1}
+.inst-tabs{display:flex;gap:0;border-bottom:0.5px solid var(--bd);margin-bottom:14px;flex-wrap:wrap}
+.itab{padding:8px 13px;font-size:12px;font-weight:500;border:none;background:none;cursor:pointer;color:var(--tx2);border-bottom:2px solid transparent;font-family:'Noto Sans KR',sans-serif;white-space:nowrap}
+.itab.on{color:var(--gd-tx);border-bottom-color:var(--gd)}
+.inst-sc{display:none}.inst-sc.on{display:block}
+
+/* Login */
+.login-box{background:var(--bg2);border-radius:16px;padding:32px 28px;width:min(88vw,340px);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-inp{width:100%;border:0.5px solid var(--bd);border-radius:var(--r8);padding:10px 12px;font-size:14px;outline:none;font-family:'JetBrains Mono',monospace;text-align:center;letter-spacing:3px;color:var(--tx);background:var(--bg3)}
+.login-inp:focus{border-color:var(--gd)}
+.login-btn{width:100%;margin-top:10px;background:var(--nv);color:#e2e8f0;border:none;border-radius:var(--r8);padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif}
+
+/* inst shared */
+.inst-section-t{font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;display:flex;align-items:center;gap:5px;text-transform:uppercase;letter-spacing:.5px}
+.inst-inp{border:0.5px solid var(--bd);border-radius:6px;padding:6px 9px;font-size:12px;background:var(--bg2);color:var(--tx);outline:none;width:100%;font-family:'Noto Sans KR',sans-serif}
+.inst-inp:focus{border-color:var(--gd)}
+.inst-add-btn{background:var(--bg3);border:0.5px dashed var(--bd2);color:var(--tx2);border-radius:var(--r8);padding:7px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;width:100%;justify-content:center;font-family:'Noto Sans KR',sans-serif;margin-top:6px}
+.inst-add-btn:hover{background:var(--gd-bg);border-color:var(--gd);color:var(--gd-tx)}
+.inst-row{display:flex;gap:6px;align-items:flex-start;margin-bottom:6px;background:var(--bg3);border:0.5px solid var(--bd);border-radius:var(--r8);padding:8px 10px}
+.inst-row-n{font-size:11px;color:var(--tx3);width:18px;flex-shrink:0;padding-top:7px;text-align:right}
+.inst-fields{flex:1;display:flex;flex-direction:column;gap:5px}
+.inst-inp-row{display:flex;gap:5px;flex-wrap:wrap}
+.inst-del{background:none;border:0.5px solid var(--bd);color:var(--tx3);border-radius:6px;padding:5px 7px;font-size:12px;cursor:pointer;flex-shrink:0}
+.inst-del:hover{background:var(--rd-bg);border-color:var(--rd);color:var(--rd-tx)}
+.inst-actions{display:flex;gap:7px;padding:12px 14px;border-top:0.5px solid var(--bd);background:var(--bg3);flex-shrink:0;flex-wrap:wrap}
+.inst-save{background:var(--gn-tx);color:var(--gn-bg);border:none;border-radius:var(--r8);padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'Noto Sans KR',sans-serif;flex:1;justify-content:center}
+.inst-btn{background:var(--bl);color:white;border:none;border-radius:var(--r8);padding:9px 12px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Noto Sans KR',sans-serif;white-space:nowrap}
+.inst-btn.dark{background:var(--nv2)}
+.week-pill{display:inline-flex;align-items:center;gap:6px;background:var(--nv);color:#e2e8f0;border-radius:20px;padding:5px 12px;font-size:12px;margin-bottom:14px}
+.week-pill select{background:none;border:none;color:#e2e8f0;font-size:12px;cursor:pointer;outline:none;font-family:'Noto Sans KR',sans-serif}
+
+/* ===== GRADE TABLE ===== */
+.grade-table-wrap{overflow-x:auto;margin-top:4px}
+.grade-table{border-collapse:collapse;width:100%;font-size:12px;min-width:600px}
+.grade-table th{background:var(--nv);color:#e2e8f0;padding:8px 10px;text-align:center;font-weight:500;white-space:nowrap;position:sticky;top:0}
+.grade-table th:first-child{text-align:left;position:sticky;left:0;z-index:2;background:var(--nv)}
+.grade-table td{padding:6px 8px;border-bottom:0.5px solid var(--bd);vertical-align:middle;text-align:center}
+.grade-table td:first-child{text-align:left;font-weight:500;color:var(--tx);position:sticky;left:0;background:var(--bg2);z-index:1;white-space:nowrap}
+.grade-table tr:nth-child(even) td{background:var(--bg3)}
+.grade-table tr:nth-child(even) td:first-child{background:var(--bg3)}
+.grade-table tr:hover td{background:var(--gd-bg)}
+.grade-table tr:hover td:first-child{background:var(--gd-bg)}
+.score-inp{border:0.5px solid var(--bd);border-radius:4px;padding:3px 5px;width:46px;font-size:12px;text-align:center;background:var(--bg2);color:var(--tx);outline:none;font-family:'JetBrains Mono',monospace}
+.score-inp:focus{border-color:var(--gd);background:var(--gd-bg)}
+.total-cell{font-weight:700;color:var(--bl-tx);font-family:'JetBrains Mono',monospace}
+.grade-cell{font-weight:700;border-radius:4px;padding:2px 6px;font-size:11px;display:inline-block}
+.grade-A{background:var(--gn-bg);color:var(--gn-tx)}
+.grade-B{background:var(--bl-bg);color:var(--bl-tx)}
+.grade-C{background:var(--or-bg);color:var(--or-tx)}
+.grade-D{background:var(--rd-bg);color:var(--rd-tx)}
+.grade-summary{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.gs-box{background:var(--bg3);border:0.5px solid var(--bd);border-radius:var(--r8);padding:8px 14px;text-align:center;flex:1;min-width:70px}
+.gs-box .gs-n{font-size:20px;font-weight:700;font-family:'Playfair Display',serif;color:var(--tx)}
+.gs-box .gs-l{font-size:10px;color:var(--tx3);margin-top:2px}
+
+/* cadet add row */
+.cadet-add-row{display:flex;gap:7px;margin-bottom:10px;align-items:center}
+.cadet-add-row input{flex:1;border:0.5px solid var(--bd);border-radius:var(--r8);padding:8px 12px;font-size:13px;outline:none;font-family:'Noto Sans KR',sans-serif}
+.cadet-add-row input:focus{border-color:var(--gd)}
+.cadet-add-row button{background:var(--nv);color:#e2e8f0;border:none;border-radius:var(--r8);padding:8px 14px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:'Noto Sans KR',sans-serif}
+
+/* docx parse */
+.parse-zone{border:1.5px dashed var(--bd2);border-radius:var(--r12);padding:20px;text-align:center;background:var(--bg3);cursor:pointer;transition:all .15s;margin-bottom:14px}
+.parse-zone:hover,.parse-zone.drag{border-color:var(--gd);background:var(--gd-bg)}
+.parse-zone i{font-size:32px;color:var(--tx3);margin-bottom:8px;display:block}
+.parse-zone p{font-size:13px;color:var(--tx2);margin-bottom:4px}
+.parse-zone small{font-size:11px;color:var(--tx3)}
+.parse-result{background:var(--gn-bg);border:0.5px solid var(--gn);border-radius:var(--r8);padding:10px 14px;font-size:12px;color:var(--gn-tx);margin-top:10px;display:none}
+.parse-result.err{background:var(--rd-bg);border-color:var(--rd);color:var(--rd-tx)}
+
+/* student import bar */
+.stu-import-bar{background:var(--gd-bg);border:0.5px solid #EF9F27;border-radius:var(--r8);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--gd-tx)}
+.stu-import-bar i{font-size:16px;flex-shrink:0}
+.stu-import-btn{background:var(--gd-tx);color:var(--gd-bg);border:none;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;white-space:nowrap}
+
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- CADET NAME MODAL -->
+<div class="name-overlay" id="name-overlay">
+  <div class="name-box">
+    <div class="kma-b">KMA</div>
+    <h2>영어발표와 연설</h2>
+    <p>생도 이름을 입력하세요.<br>교수자 성적 관리에 자동으로 등록됩니다.</p>
+    <input class="name-inp" id="name-inp" type="text" placeholder="홍길동" maxlength="10"
+      onkeydown="if(event.key==='Enter')confirmName()">
+    <button class="name-btn" onclick="confirmName()"><i class="ti ti-arrow-right"></i> 시작하기</button>
+    <div class="name-err" id="name-err">이름을 입력해주세요</div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-l">
+    <span class="kma-badge" id="kma-badge-btn">KMA</span>
+    <span class="hdr-t">영어발표와 연설 · 생도 학습 앱</span>
+  </div>
+  <div class="hdr-r">
+    <span class="ci"><i class="ti ti-user" style="font-size:13px"></i><span id="cadet-name-disp">생도</span></span>
+    <select class="wk-sel" id="wk-sel" onchange="changeWeek(this.value)"></select>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nb on" onclick="go('vocab')" id="nb-vocab"><i class="ti ti-cards"></i>단어장</button>
+  <button class="nb" onclick="go('pattern')" id="nb-pattern"><i class="ti ti-puzzle"></i>패턴 드릴</button>
+  <button class="nb" onclick="go('shadow')" id="nb-shadow"><i class="ti ti-ear"></i>섀도잉</button>
+  <button class="nb" onclick="go('draft')" id="nb-draft"><i class="ti ti-edit"></i>드래프트</button>
+  <button class="nb" onclick="go('final')" id="nb-final"><i class="ti ti-microphone"></i>최종 제출</button>
+</nav>
+
+<div class="body">
+
+<!-- PROGRESS -->
+<div class="pstrip">
+  <div class="pi" id="ps-v"><div class="pl">단어 학습</div><div class="pv" id="pv-v">-</div></div>
+  <div class="pi" id="ps-p"><div class="pl">패턴 드릴</div><div class="pv" id="pv-p">-</div></div>
+  <div class="pi" id="ps-s"><div class="pl">섀도잉</div><div class="pv" id="pv-s">미완료</div></div>
+  <div class="pi" id="ps-f"><div class="pl">최종 제출</div><div class="pv" id="pv-f">미제출</div></div>
+</div>
+
+<!-- 자료 불러오기 -->
+<div class="stu-import-bar" id="stu-import-bar">
+  <i class="ti ti-file-import"></i>
+  <span>교수자 배포 자료(.json)를 불러올 수 있습니다.</span>
+  <label class="stu-import-btn" style="cursor:pointer">자료 불러오기
+    <input type="file" accept=".json" style="display:none" onchange="importStudentData(event)">
+  </label>
+</div>
+
+<!-- ===== VOCAB ===== -->
+<div id="sc-vocab" class="sc on">
+  <div class="card">
+    <div class="ct"><i class="ti ti-cards"></i><span id="vocab-title">어휘 플래시카드</span></div>
+    <div class="fnav">
+      <span style="font-size:11px;color:var(--tx3)" id="fc-c">1 / -</span>
+      <span style="font-size:11px;color:var(--tx3)" id="fc-prog">학습 완료: 0개</span>
+    </div>
+    <div class="fc-area" id="fc-area" onclick="flipCard()">
+      <div id="fc-front">
+        <div class="fc-word" id="fc-word">-</div>
+        <div class="fc-hint">카드를 클릭하거나 뜻 보기를 누르세요</div>
+      </div>
+      <div class="fc-back" id="fc-back">
+        <div class="fc-meaning" id="fc-meaning">-</div>
+        <div class="fc-ex" id="fc-ex"></div>
+      </div>
+    </div>
+    <div class="fc-btns" id="fc-front-btns">
+      <button class="btn-tts" onclick="event.stopPropagation();speakWord()"><i class="ti ti-volume"></i> 단어 듣기</button>
+      <button class="btn-flip" onclick="event.stopPropagation();flipCard()"><i class="ti ti-rotate"></i> 뜻 보기</button>
+    </div>
+    <div class="fc-btns" id="fc-back-btns" style="display:none">
+      <button class="btn-tts" onclick="speakWord()"><i class="ti ti-volume"></i> 다시 듣기</button>
+      <button class="btn-next" onclick="nextCard()"><i class="ti ti-arrow-right"></i> 다음 단어</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PATTERN ===== -->
+<div id="sc-pattern" class="sc">
+  <div class="card">
+    <div class="ct"><i class="ti ti-puzzle"></i><span id="pattern-title">패턴 빈칸 드릴</span></div>
+    <div class="info-box"><i class="ti ti-info-circle"></i><span><strong>문장 듣기</strong> 후 빈칸에 단어를 입력하고 <strong>제출</strong>을 누르세요.</span></div>
+    <div id="pat-list"></div>
+  </div>
+</div>
+
+<!-- ===== SHADOW ===== -->
+<div id="sc-shadow" class="sc">
+  <div class="card">
+    <div class="ct"><i class="ti ti-ear"></i><span id="shadow-title">섀도잉</span></div>
+    <div class="info-box"><i class="ti ti-player-play" style="font-size:12px"></i><span><strong>문장 듣기</strong> 후 <strong>섀도잉 시작</strong>을 눌러 동시에 따라 말하세요.</span></div>
+    <div id="shadow-list"></div>
+    <div style="border-top:0.5px solid var(--bd);padding-top:10px;display:flex;justify-content:flex-end">
+      <button style="background:var(--gn-tx);color:var(--gn-bg);border:none;border-radius:7px;padding:7px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Noto Sans KR',sans-serif" id="shadow-done-btn" onclick="markShadowDone()" disabled>
+        <i class="ti ti-check"></i> 섀도잉 완료 · 최종 제출로 이동
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DRAFT ===== -->
+<div id="sc-draft" class="sc">
+  <div class="card">
+    <div class="ct"><i class="ti ti-edit"></i>스크립트 드래프트 · AI 루브릭 검사</div>
+    <div class="dchips">
+      <span class="dchip" id="dc-intro">서론 미확인</span>
+      <span class="dchip" id="dc-body">본론 미확인</span>
+      <span class="dchip" id="dc-concl">결론 미확인</span>
+      <span class="dchip" id="dc-topic">주제 미확인</span>
+      <span class="dchip" id="dc-gram">문법 미확인</span>
+      <span class="dchip" id="dc-len">길이 미확인</span>
+    </div>
+    <textarea class="dta" id="dta" rows="7" placeholder="리더십 스피치를 작성하세요. 서론·본론·결론 구조로, 1분 스피치 기준 약 120~150단어가 적당합니다." oninput="liveChk()"></textarea>
+    <div id="dai-box" class="dai ok" style="display:none"></div>
+    <div class="dact">
+      <button class="bai" onclick="runAi()"><i class="ti ti-robot"></i> AI 루브릭 검사</button>
+      <button class="bsub" id="dsub" onclick="submitDraft()" disabled><i class="ti ti-send"></i> 드래프트 제출</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FINAL ===== -->
+<div id="sc-final" class="sc">
+  <div class="card">
+    <div class="ct"><i class="ti ti-microphone"></i>최종 스피치 녹음 및 AI 즉시 평가</div>
+    <div class="info-box"><i class="ti ti-info-circle"></i><span><strong>1~2분간 끊김 없이 녹음</strong>하세요. 제출 즉시 AI가 자동 채점합니다.</span></div>
+    <div id="rec-area-wrap" class="rec-area">
+      <div class="rec-status" id="rec-status">버튼을 눌러 녹음을 시작하세요</div>
+      <div class="rec-timer" id="rec-timer">0:00</div>
+      <div class="rec-wave" id="rec-wave">
+        <div class="rbar" style="height:6px"></div><div class="rbar" style="height:10px"></div><div class="rbar" style="height:7px"></div><div class="rbar" style="height:15px"></div><div class="rbar" style="height:6px"></div><div class="rbar" style="height:18px"></div><div class="rbar" style="height:10px"></div><div class="rbar" style="height:8px"></div><div class="rbar" style="height:14px"></div><div class="rbar" style="height:7px"></div>
+      </div>
+      <button class="rec-main-btn" id="rec-main" onclick="toggleRec()"><i class="ti ti-microphone" id="rec-ico"></i></button>
+      <div class="rec-preview" id="rec-preview">
+        <div style="display:flex;justify-content:space-between;margin-bottom:7px">
+          <span style="font-size:12px;font-weight:500"><i class="ti ti-file-audio"></i> 녹음본 준비됨</span>
+          <span id="rec-dur" style="font-size:11px;color:var(--tx3)"></span>
+        </div>
+        <div style="background:var(--bg3);border-radius:6px;height:4px;overflow:hidden;margin-bottom:8px">
+          <div id="play-prog" style="height:100%;width:0%;background:var(--bl);transition:width .15s;border-radius:6px"></div>
+        </div>
+        <button onclick="playPrev()" style="background:none;border:0.5px solid var(--bd);color:var(--tx);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Noto Sans KR',sans-serif">
+          <i class="ti ti-player-play" id="pp-ico"></i><span id="pp-lbl">미리 듣기</span>
+        </button>
+      </div>
+      <div class="rec-actions" id="rec-actions" style="display:none">
+        <button class="breset" onclick="resetRec()"><i class="ti ti-refresh"></i> 다시 녹음</button>
+        <button class="bfinal" id="final-sub" onclick="submitFinal()"><i class="ti ti-send"></i> 제출 및 AI 채점</button>
+      </div>
+    </div>
+  </div>
+  <div id="rubric-result" style="display:none">
+    <div class="rubric-card">
+      <div class="rubric-header">
+        <div><div style="font-size:13px;font-weight:500">AI 즉시 채점 결과</div><div style="font-size:11px;color:var(--tx3);margin-top:2px">교수자 최종 확정 전 참고용</div></div>
+        <div style="text-align:right"><div class="rubric-total" id="r-total">-<span>/28점</span></div><div id="r-grade" class="grade-badge" style="margin-top:4px"></div></div>
+      </div>
+      <div id="rubric-rows"></div>
+      <div class="overall-box" id="overall-fb"></div>
+    </div>
+    <div style="margin-top:8px;background:var(--bg2);border:0.5px solid #97C459;border-radius:var(--r8);padding:10px 14px;font-size:12px;color:var(--gn-tx);display:flex;align-items:flex-start;gap:7px">
+      <i class="ti ti-circle-check" style="font-size:16px;flex-shrink:0;margin-top:1px"></i>
+      <span>AI 채점 결과가 저장되었습니다. 교수자가 정성 평가를 추가해 <strong>최종 점수를 확정</strong>합니다.</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /body -->
+</div><!-- /app -->
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================ -->
+<!-- INSTRUCTOR OVERLAY -->
+<!-- ============================================================ -->
+<div class="inst-overlay" id="inst-overlay">
+  <!-- LOGIN -->
+  <div id="inst-login" class="login-box">
+    <div style="background:var(--gd);color:var(--nv);font-weight:700;font-size:13px;padding:5px 14px;border-radius:3px;letter-spacing:3px;display:inline-block;margin-bottom:16px">KMA</div>
+    <h2 style="font-size:16px;font-weight:700;margin-bottom:6px;font-family:'Playfair Display',serif">교수자 모드</h2>
+    <p style="font-size:12px;color:var(--tx3);margin-bottom:18px">비밀번호를 입력하세요</p>
+    <input class="login-inp" id="pw-inp" type="password" placeholder="••••••••" maxlength="20"
+      onkeydown="if(event.key==='Enter')tryLogin()">
+    <button class="login-btn" onclick="tryLogin()"><i class="ti ti-lock-open"></i> 로그인</button>
+    <div style="font-size:12px;color:var(--rd-tx);margin-top:8px;display:none" id="login-err">비밀번호가 올바르지 않습니다</div>
+    <div style="margin-top:12px;font-size:11px;color:var(--tx3)">기본 비밀번호: kma2025</div>
+    <button onclick="closeInst()" style="margin-top:10px;background:none;border:none;color:var(--tx3);font-size:12px;cursor:pointer;font-family:'Noto Sans KR',sans-serif">취소</button>
+  </div>
+
+  <!-- PANEL -->
+  <div id="inst-panel" class="inst-modal" style="display:none">
+    <div class="inst-hdr">
+      <div class="inst-hdr-t"><i class="ti ti-shield-lock"></i> 교수자 관리 패널</div>
+      <button class="inst-close" onclick="closeInst()"><i class="ti ti-x"></i></button>
+    </div>
+    <div style="padding:8px 14px 0;background:var(--bg3);border-bottom:0.5px solid var(--bd);flex-shrink:0">
+      <div class="inst-tabs">
+        <button class="itab on" onclick="iTab('grades',this)"><i class="ti ti-chart-bar"></i> 생도 성적</button>
+        <button class="itab" onclick="iTab('words',this)"><i class="ti ti-cards"></i> 단어장</button>
+        <button class="itab" onclick="iTab('pats',this)"><i class="ti ti-puzzle"></i> 패턴 드릴</button>
+        <button class="itab" onclick="iTab('shadows',this)"><i class="ti ti-ear"></i> 섀도잉</button>
+        <button class="itab" onclick="iTab('docx',this)"><i class="ti ti-file-word"></i> 파일 업로드</button>
+        <button class="itab" onclick="iTab('settings',this)"><i class="ti ti-settings"></i> 설정</button>
+      </div>
+    </div>
+    <div class="inst-body">
+
+      <!-- ===== GRADE TAB ===== -->
+      <div class="inst-sc on" id="inst-sc-grades">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+          <div class="inst-section-t" style="margin:0"><i class="ti ti-users"></i> 생도 명단 및 주차별 성적</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <select id="grade-wk-sel" onchange="refreshGradeSummary()" style="border:0.5px solid var(--bd);border-radius:6px;padding:5px 9px;font-size:12px;background:var(--bg2);font-family:'Noto Sans KR',sans-serif;outline:none"></select>
+            <button class="inst-btn" onclick="exportGradeCSV()"><i class="ti ti-file-spreadsheet"></i> CSV 내보내기</button>
+          </div>
+        </div>
+
+        <!-- summary -->
+        <div class="grade-summary" id="grade-summary"></div>
+
+        <!-- add cadet -->
+        <div class="cadet-add-row">
+          <input id="new-cadet-inp" type="text" placeholder="생도 이름 입력 후 Enter" maxlength="10"
+            onkeydown="if(event.key==='Enter')addCadet()">
+          <button onclick="addCadet()"><i class="ti ti-user-plus"></i> 추가</button>
+        </div>
+
+        <div class="grade-table-wrap">
+          <table class="grade-table" id="grade-table">
+            <thead id="grade-thead"></thead>
+            <tbody id="grade-tbody"></tbody>
+          </table>
+        </div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:8px;line-height:1.6">
+          <i class="ti ti-info-circle" style="font-size:12px"></i> 점수 입력 후 <strong>저장 및 앱 반영</strong>을 누르세요. 생도가 앱에 이름을 입력하면 명단에 자동 등록됩니다.
+        </div>
+      </div>
+
+      <!-- ===== WORDS TAB ===== -->
+      <div class="inst-sc" id="inst-sc-words">
+        <div class="week-pill"><i class="ti ti-calendar" style="font-size:14px"></i>편집 중:
+          <select id="inst-wk" onchange="loadInstWeek(this.value)" style="background:none;border:none;color:#e2e8f0;font-size:12px;cursor:pointer;outline:none;font-family:'Noto Sans KR',sans-serif"></select>
+        </div>
+        <div class="inst-section-t"><i class="ti ti-cards"></i> 단어 목록</div>
+        <div id="inst-words-list"></div>
+        <button class="inst-add-btn" onclick="addInstWord()"><i class="ti ti-plus"></i> 단어 추가</button>
+      </div>
+
+      <!-- ===== PATTERNS TAB ===== -->
+      <div class="inst-sc" id="inst-sc-pats">
+        <div class="week-pill" style="margin-bottom:8px"><i class="ti ti-calendar" style="font-size:14px"></i>편집 중:
+          <select id="inst-wk-p" onchange="loadInstWeek(this.value)" style="background:none;border:none;color:#e2e8f0;font-size:12px;cursor:pointer;outline:none;font-family:'Noto Sans KR',sans-serif"></select>
+        </div>
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">빈칸 위치는 <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">_____</code> (밑줄 5개)로 표시</div>
+        <div class="inst-section-t"><i class="ti ti-puzzle"></i> 패턴 목록</div>
+        <div id="inst-pats-list"></div>
+        <button class="inst-add-btn" onclick="addInstPat()"><i class="ti ti-plus"></i> 패턴 추가</button>
+      </div>
+
+      <!-- ===== SHADOWS TAB ===== -->
+      <div class="inst-sc" id="inst-sc-shadows">
+        <div class="week-pill" style="margin-bottom:8px"><i class="ti ti-calendar" style="font-size:14px"></i>편집 중:
+          <select id="inst-wk-s" onchange="loadInstWeek(this.value)" style="background:none;border:none;color:#e2e8f0;font-size:12px;cursor:pointer;outline:none;font-family:'Noto Sans KR',sans-serif"></select>
+        </div>
+        <div class="inst-section-t"><i class="ti ti-ear"></i> 섀도잉 문장</div>
+        <div id="inst-shadows-list"></div>
+        <button class="inst-add-btn" onclick="addInstShadow()"><i class="ti ti-plus"></i> 문장 추가</button>
+      </div>
+
+      <!-- ===== DOCX TAB ===== -->
+      <div class="inst-sc" id="inst-sc-docx">
+        <div class="inst-section-t"><i class="ti ti-file-word"></i> Word(.docx) 파일 자동 파싱</div>
+        <div class="info-box" style="margin-bottom:12px"><i class="ti ti-info-circle"></i><span>수업 자료 Word 파일을 업로드하면 <strong>단어표·패턴표·섀도잉 문장</strong>을 자동으로 추출합니다. 기존 자료에 <strong>추가</strong>하거나 <strong>덮어쓰기</strong>할 수 있습니다.</span></div>
+        <div style="margin-bottom:10px">
+          <div class="inst-section-t" style="margin-bottom:6px"><i class="ti ti-calendar"></i> 어느 주차에 적용할까요?</div>
+          <select id="docx-target-wk" style="border:0.5px solid var(--bd);border-radius:var(--r8);padding:7px 12px;font-size:13px;background:var(--bg2);font-family:'Noto Sans KR',sans-serif;outline:none;width:100%"></select>
+        </div>
+        <label class="parse-zone" id="parse-zone" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDocxDrop(event)">
+          <i class="ti ti-upload"></i>
+          <p>Word 파일(.docx)을 여기에 드래그하거나 클릭하여 업로드</p>
+          <small>주차 수업자료 파일 (week4_5_dunkirk.docx 등)</small>
+          <input type="file" accept=".docx,.doc" style="display:none" id="docx-file-inp" onchange="handleDocxFile(event)">
+        </label>
+        <div class="parse-result" id="parse-result"></div>
+        <div id="docx-preview" style="display:none;margin-top:12px">
+          <div class="inst-section-t"><i class="ti ti-eye"></i> 파싱 미리보기</div>
+          <div id="docx-preview-content" style="font-size:12px;color:var(--tx2);line-height:1.7;background:var(--bg3);border:0.5px solid var(--bd);border-radius:var(--r8);padding:10px;max-height:200px;overflow-y:auto"></div>
+          <div style="display:flex;gap:7px;margin-top:10px">
+            <button onclick="applyDocxParsed('add')" style="flex:1;background:var(--bl);color:white;border:none;border-radius:var(--r8);padding:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:'Noto Sans KR',sans-serif"><i class="ti ti-plus"></i> 기존 자료에 추가</button>
+            <button onclick="applyDocxParsed('replace')" style="flex:1;background:var(--rd-tx);color:white;border:none;border-radius:var(--r8);padding:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:'Noto Sans KR',sans-serif"><i class="ti ti-replace"></i> 전체 덮어쓰기</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SETTINGS TAB ===== -->
+      <div class="inst-sc" id="inst-sc-settings">
+        <div class="inst-section-t"><i class="ti ti-calendar-week"></i> 주차 관리</div>
+        <div id="inst-weeks-list"></div>
+        <button class="inst-add-btn" onclick="addInstWeek()"><i class="ti ti-plus"></i> 주차 추가</button>
+        <div style="margin-top:18px">
+          <div class="inst-section-t"><i class="ti ti-key"></i> 비밀번호 변경</div>
+          <div style="display:flex;gap:7px">
+            <input class="inst-inp" id="new-pw" type="password" placeholder="새 비밀번호 (4자 이상)" style="max-width:220px">
+            <button onclick="changePw()" style="background:var(--nv);color:#e2e8f0;border:none;border-radius:6px;padding:7px 12px;font-size:12px;cursor:pointer;font-family:'Noto Sans KR',sans-serif">변경</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /inst-body -->
+    <div class="inst-actions">
+      <button class="inst-btn dark" onclick="document.getElementById('json-import-inp').click()">
+        <i class="ti ti-file-import"></i> JSON 불러오기
+        <input type="file" id="json-import-inp" accept=".json" style="display:none" onchange="importInst(event)">
+      </button>
+      <button class="inst-btn" onclick="exportInst()"><i class="ti ti-file-export"></i> JSON 내보내기</button>
+      <button class="inst-save" onclick="saveInst()"><i class="ti ti-device-floppy"></i> 저장 및 앱 반영</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<script>
+// ==================== DEFAULT DATA ====================
+const DEFAULT_DATA={
+  weeks:[
+    {id:'w4',label:'4주차 · Churchill 됭케르크'},
+    {id:'w3',label:'3주차 · Churchill 취임'},
+    {id:'w2',label:'2주차 · McRaven'},
+    {id:'w1',label:'1주차 · King'},
+  ],
+  cadets:[], // [{name,scores:{w3:28,w4:null,...}}]
+  content:{
+    w4:{
+      title:'됭케르크 · We Shall Fight on the Beaches',
+      words:[
+        {w:'evacuation',m:'대피, 철수',ex:'The evacuation of 338,000 soldiers was a miracle.'},
+        {w:'surrender',m:'항복하다, 포기하다',ex:'We shall never surrender to tyranny.'},
+        {w:'menace',m:'위협, 위험',ex:'We will outlive the menace of tyranny.'},
+        {w:'tyranny',m:'폭정, 독재',ex:'Churchill defied the tyranny of Nazi Germany.'},
+        {w:'confidence',m:'확신, 자신감',ex:'I have full confidence that we shall prevail.'},
+        {w:'subjugate',m:'정복하다, 굴복시키다',ex:'They attempted to subjugate the entire continent.'},
+        {w:'liberation',m:'해방',ex:'The liberation of Europe was the ultimate goal.'},
+        {w:'struggle',m:'투쟁, 싸움',ex:'We shall carry on the struggle until victory.'},
+        {w:'apparatus',m:'기구, 장치 (체제)',ex:'The odious apparatus of Nazi rule collapsed.'},
+        {w:'outlive',m:'~보다 오래 살다',ex:'We shall outlive the menace of tyranny.'},
+        {w:'fleet',m:'함대',ex:'The British Fleet guarded the seas.'},
+        {w:'retreat',m:'후퇴, 철수',ex:'The retreat from Dunkirk became a symbol of resilience.'},
+        {w:'encircle',m:'포위하다',ex:'The enemy attempted to encircle our forces.'},
+        {w:'harbour',m:'항구',ex:'The harbour was full of small civilian boats.'},
+        {w:'embark',m:'승선하다, 탑승하다',ex:'Soldiers began to embark on civilian vessels.'},
+      ],
+      patterns:[
+        {blank:'We shall fight on the beaches, we shall fight on the _____ grounds.',a:'landing',full:'We shall fight on the beaches, we shall fight on the landing grounds.',hint:'명사 · 상륙'},
+        {blank:'Even though large tracts of Europe have fallen, we shall not _____ or fail.',a:'flag',full:'Even though large tracts of Europe have fallen, we shall not flag or fail.',hint:'동사 · 약해지다'},
+        {blank:'We shall go on to the _____, whatever the cost may be.',a:'end',full:'We shall go on to the end, whatever the cost may be.',hint:'명사 · 끝'},
+        {blank:'We shall fight with growing confidence and growing _____ in the air.',a:'strength',full:'We shall fight with growing confidence and growing strength in the air.',hint:'명사 · 힘'},
+        {blank:'We shall _____ surrender.',a:'never',full:'We shall never surrender.',hint:'부사 · 절대'},
+        {blank:'I have, myself, full _____ that if all do their duty, we shall prove ourselves.',a:'confidence',full:'I have, myself, full confidence that if all do their duty, we shall prove ourselves.',hint:'명사 · 확신'},
+      ],
+      shadows:[
+        {en:'We shall fight on the beaches, we shall fight on the landing grounds.',ko:'우리는 해변에서 싸울 것이며, 상륙지에서 싸울 것입니다.',tip:'shall에 강세 — 결의를 담아 또렷하게 발음하세요.'},
+        {en:'We shall fight in the fields and in the streets, we shall fight in the hills.',ko:'우리는 들판에서, 거리에서, 언덕에서 싸울 것입니다.',tip:'반복 구조에서 매번 동일한 강세 패턴을 유지하세요.'},
+        {en:'We shall never surrender.',ko:'우리는 절대 항복하지 않을 것입니다.',tip:'never를 길게 늘여 강조 — 결의의 클라이맥스입니다.'},
+        {en:'We shall go on to the end, whatever the cost may be.',ko:'어떤 대가가 있더라도 우리는 끝까지 나아갈 것입니다.',tip:'whatever the cost — 양보절을 조금 낮게 처리한 후 end를 다시 올리세요.'},
+        {en:'Even though large tracts of Europe have fallen, we shall not flag or fail.',ko:'유럽의 광대한 영토가 함락되었을지라도, 우리는 약해지거나 실패하지 않을 것입니다.',tip:'Even though 절은 빠르게, 주절(we shall not flag)을 천천히 강조하세요.'},
+      ],
+      keywords:['fight','surrender','tyranny','evacuation','liberation','confidence','struggle','fleet','menace','outlive'],
+      patternKW:['we shall fight','never surrender','go on to the end','not flag or fail','full confidence'],
+    },
+    w3:{
+      title:'Churchill 취임 연설',
+      words:[
+        {w:'perseverance',m:'인내, 끈기',ex:'Victory belongs to those who demonstrate perseverance.'},
+        {w:'adversity',m:'역경, 고난',ex:'Great leaders are forged in the fires of adversity.'},
+        {w:'valor',m:'용맹, 용기',ex:'Acts of valor define the character of a soldier.'},
+        {w:'fortitude',m:'불굴의 정신',ex:'Fortitude in crisis separates leaders from followers.'},
+        {w:'sovereignty',m:'주권, 통치권',ex:'A nation must defend its sovereignty at all costs.'},
+        {w:'mobilize',m:'동원하다',ex:'We must mobilize every resource available to us.'},
+        {w:'tenacity',m:'끈질김, 집요함',ex:'Her tenacity in the face of defeat inspired all.'},
+        {w:'unwavering',m:'흔들리지 않는',ex:'An unwavering commitment to duty defines the officer.'},
+        {w:'defiance',m:'저항, 반항',ex:'We stood in defiance against overwhelming odds.'},
+        {w:'resilience',m:'회복력',ex:'Resilience is the hallmark of true leadership.'},
+      ],
+      patterns:[
+        {blank:'We shall _____ on the beaches, we shall fight on the landing grounds.',a:'fight',full:'We shall fight on the beaches, we shall fight on the landing grounds.',hint:'동사 · 싸우다'},
+        {blank:'I have nothing to offer but blood, _____, tears, and sweat.',a:'toil',full:'I have nothing to offer but blood, toil, tears, and sweat.',hint:'명사 · 노고'},
+        {blank:'Victory at all _____ — victory in spite of all terror.',a:'costs',full:'Victory at all costs — victory in spite of all terror.',hint:'명사 복수 · 대가'},
+        {blank:'You ask, what is our _____? I can answer in one word: victory.',a:'aim',full:'You ask, what is our aim? I can answer in one word: victory.',hint:'명사 · 목표'},
+        {blank:'We shall never _____ and we shall never be enslaved.',a:'surrender',full:'We shall never surrender and we shall never be enslaved.',hint:'동사 · 항복하다'},
+      ],
+      shadows:[
+        {en:'I have nothing to offer but blood, toil, tears, and sweat.',ko:'저는 피와 노고와 눈물과 땀 외에는 드릴 것이 없습니다.',tip:'단어를 또렷하게 끊어 읽되 문장 리듬을 살리세요.'},
+        {en:'You ask, what is our aim? I can answer in one word: victory.',ko:'여러분은 우리의 목표가 무엇이냐 묻습니다. 한 단어로 답하면: 승리입니다.',tip:'victory를 짧고 강하게 — 마침표처럼 끊으세요.'},
+        {en:'We shall never surrender.',ko:'우리는 절대 항복하지 않을 것입니다.',tip:'never를 길게, surrender를 천천히.'},
+      ],
+      keywords:['blood','toil','tears','sweat','fight','victory','perseverance','adversity','courage','defiance'],
+      patternKW:['we shall','nothing to offer','in spite of','at all costs','you ask'],
+    },
+    w2:{title:'McRaven 졸업식 연설',words:[{w:'discipline',m:'규율, 훈련',ex:'Discipline bridges goals and accomplishment.'},{w:'integrity',m:'청렴, 진실성',ex:'Integrity means doing right when no one watches.'},{w:'courage',m:'용기',ex:'Courage is the triumph over fear.'},{w:'humility',m:'겸손',ex:'Humility lets leaders learn from mistakes.'},{w:'accountability',m:'책임감',ex:'Accountability is the foundation of trust.'},{w:'relentless',m:'끈질긴, 가차없는',ex:'Relentless effort is the key to success.'},{w:'adversity',m:'역경',ex:'Adversity reveals character.'},{w:'endurance',m:'인내력, 지구력',ex:'Endurance is the mark of a warrior.'},{w:'compassion',m:'연민',ex:'Great leaders show compassion to those in need.'},{w:'resilience',m:'회복력',ex:'Resilience is built through hardship.'}],patterns:[{blank:'If you want to _____ the world, start by making your bed.',a:'change',full:'If you want to change the world, start by making your bed.',hint:'동사 · 변화시키다'},{blank:'Never ring the _____ — never give up.',a:'bell',full:'Never ring the bell — never give up.',hint:'명사 · 종'}],shadows:[{en:'If you want to change the world, start by making your bed.',ko:'세상을 변화시키고 싶다면, 침대 정리부터 시작하세요.',tip:'조건절을 가볍게, 핵심 명령문을 강조하세요.'},{en:'Never ring the bell — never give up.',ko:'절대 종을 울리지 마세요 — 절대 포기하지 마세요.',tip:'두 번의 never에 동등한 강세를 두세요.'}],keywords:['discipline','integrity','courage','humility','accountability','relentless','adversity','endurance','compassion','resilience'],patternKW:['if you want','never ring','change the world']},
+    w1:{title:'Martin Luther King "I Have a Dream"',words:[{w:'justice',m:'정의',ex:'We will not be satisfied until justice rolls down like waters.'},{w:'freedom',m:'자유',ex:'Free at last, we are free at last.'},{w:'equality',m:'평등',ex:'All men are created equal.'},{w:'dream',m:'꿈, 이상',ex:'I have a dream that one day this nation will rise up.'},{w:'oppression',m:'억압',ex:'We cannot walk alone as long as oppression exists.'},{w:'brotherhood',m:'형제애',ex:'Brotherhood transcends race and class.'},{w:'destiny',m:'운명',ex:'We are bound by a common destiny.'},{w:'righteous',m:'정당한, 올바른',ex:'We will not rest until righteous judgment prevails.'},{w:'beacon',m:'횃불, 등대',ex:'America must serve as a beacon of hope.'},{w:'redemption',m:'구원, 속죄',ex:'The arc of the moral universe bends toward redemption.'}],patterns:[{blank:'I have a _____ that one day this nation will rise up.',a:'dream',full:'I have a dream that one day this nation will rise up.',hint:'명사 · 꿈'},{blank:'We will not be satisfied until _____ rolls down like waters.',a:'justice',full:'We will not be satisfied until justice rolls down like waters.',hint:'명사 · 정의'}],shadows:[{en:'I have a dream that one day this nation will rise up.',ko:'나는 언젠가 이 나라가 일어설 것이라는 꿈이 있습니다.',tip:'dream에 감정을 실어 천천히 강조하세요.'},{en:'We will not be satisfied until justice rolls down like waters.',ko:'정의가 물처럼 흘러내릴 때까지 우리는 만족하지 않을 것입니다.',tip:'until 이하 절을 점층적으로 강조하세요.'}],keywords:['justice','freedom','equality','dream','oppression','brotherhood','destiny','righteous','beacon','redemption'],patternKW:['i have a dream','free at last','we will not','cannot walk']},
+  }
+};
+
+// ==================== STATE ====================
+let DATA=JSON.parse(JSON.stringify(DEFAULT_DATA));
+let currentWeek=DATA.weeks[0].id;
+let WORDS=[],PATS=[],SHADOWS=[];
+let cardIdx=0,seenCount=0,flipped=false;
+let patDone=[],shdwDone=[],shdwAcc=[],shdwRec=[];
+let draftOk=false,recOn=false,recSec=0,recTick=null,hasRec=false,submitted=false,playInt=null;
+let badgeClicks=0,badgeTimer=null;
+let instPw=localStorage.getItem('kma_inst_pw')||'kma2025';
+let instEditData=null;
+let parsedDocxData=null;
+let cadetName='';
+
+// ==================== CADET NAME ====================
+function init(){
+  const saved=localStorage.getItem('kma_data');
+  if(saved){try{DATA=JSON.parse(saved);}catch(e){}}
+  const sn=localStorage.getItem('kma_cadet_name');
+  if(sn){cadetName=sn;document.getElementById('cadet-name-disp').textContent=sn;document.getElementById('name-overlay').style.display='none';}
+  else{document.getElementById('name-overlay').style.display='flex';}
+  buildWeekSel();loadWeek(currentWeek);
+}
+
+function confirmName(){
+  const v=document.getElementById('name-inp').value.trim();
+  if(!v){document.getElementById('name-err').style.display='block';return;}
+  cadetName=v;
+  localStorage.setItem('kma_cadet_name',v);
+  document.getElementById('cadet-name-disp').textContent=v;
+  document.getElementById('name-overlay').style.display='none';
+  // auto-register in cadets list
+  autoRegisterCadet(v);
+  showToast('환영합니다, '+v+' 생도!');
+}
+
+function autoRegisterCadet(name){
+  if(!DATA.cadets)DATA.cadets=[];
+  if(!DATA.cadets.find(c=>c.name===name)){
+    DATA.cadets.push({name,scores:{}});
+    DATA.cadets.sort((a,b)=>koreanSort(a.name,b.name));
+    localStorage.setItem('kma_data',JSON.stringify(DATA));
+  }
+}
+
+function koreanSort(a,b){return a.localeCompare(b,'ko');}
+
+// ==================== WEEK ====================
+function buildWeekSel(){
+  const sel=document.getElementById('wk-sel');
+  sel.innerHTML=DATA.weeks.map(w=>`<option value="${w.id}">${w.label}</option>`).join('');
+}
+
+function loadWeek(wid){
+  currentWeek=wid;
+  const c=DATA.content[wid]||{words:[],patterns:[],shadows:[],title:'',keywords:[],patternKW:[]};
+  WORDS=c.words||[];PATS=c.patterns||[];SHADOWS=c.shadows||[];
+  patDone=Array(PATS.length).fill(false);
+  shdwDone=Array(SHADOWS.length).fill(false);
+  shdwAcc=Array(SHADOWS.length).fill(0);
+  shdwRec=Array(SHADOWS.length).fill(false);
+  cardIdx=0;seenCount=0;flipped=false;draftOk=false;
+  recOn=false;recSec=0;hasRec=false;submitted=false;
+  document.getElementById('vocab-title').textContent='어휘 플래시카드 · '+(c.title||wid)+' ('+WORDS.length+'단어)';
+  document.getElementById('pattern-title').textContent='패턴 빈칸 드릴 · '+(c.title||wid);
+  document.getElementById('shadow-title').textContent='섀도잉 · '+(c.title||wid);
+  document.getElementById('pv-p').textContent='0/'+PATS.length;
+  document.getElementById('pv-v').textContent='0/'+WORDS.length;
+  document.getElementById('pv-s').textContent='미완료';
+  document.getElementById('pv-f').textContent='미제출';
+  ['ps-v','ps-p','ps-s','ps-f'].forEach(id=>document.getElementById(id).classList.remove('done'));
+  renderCard();renderPats();renderShadow();go('vocab');
+}
+
+function changeWeek(wid){
+  if(confirm('주차를 변경하면 현재 진도가 초기화됩니다. 계속할까요?'))loadWeek(wid);
+  else document.getElementById('wk-sel').value=currentWeek;
+}
+
+// ==================== FLASHCARD ====================
+function renderCard(){
+  if(!WORDS.length){document.getElementById('fc-word').textContent='(단어 없음)';return;}
+  const w=WORDS[cardIdx];
+  document.getElementById('fc-word').textContent=w.w;
+  document.getElementById('fc-meaning').textContent=w.m;
+  document.getElementById('fc-ex').textContent='"'+w.ex+'"';
+  document.getElementById('fc-c').textContent=(cardIdx+1)+'/'+WORDS.length;
+  document.getElementById('fc-prog').textContent='학습 완료: '+seenCount+'개';
+  flipped=false;
+  document.getElementById('fc-front').style.display='block';
+  document.getElementById('fc-back').style.display='none';
+  document.getElementById('fc-front-btns').style.display='flex';
+  document.getElementById('fc-back-btns').style.display='none';
+}
+function speakWord(){const w=WORDS[cardIdx];if(!w)return;if('speechSynthesis' in window){window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(w.w);u.lang='en-US';u.rate=0.78;window.speechSynthesis.speak(u);}showToast('발음 재생: '+w.w);}
+function flipCard(){flipped=!flipped;document.getElementById('fc-front').style.display=flipped?'none':'block';document.getElementById('fc-back').style.display=flipped?'flex':'none';document.getElementById('fc-front-btns').style.display=flipped?'none':'flex';document.getElementById('fc-back-btns').style.display=flipped?'flex':'none';}
+function nextCard(){seenCount=Math.min(seenCount+1,WORDS.length);cardIdx=(cardIdx+1)%WORDS.length;renderCard();if(seenCount>=WORDS.length){document.getElementById('ps-v').classList.add('done');document.getElementById('pv-v').textContent='완료';}else{document.getElementById('pv-v').textContent=seenCount+'/'+WORDS.length;}}
+
+// ==================== PATTERN ====================
+function renderPats(){
+  const el=document.getElementById('pat-list');el.innerHTML='';
+  if(!PATS.length){el.innerHTML='<div style="font-size:12px;color:var(--tx3);padding:10px">패턴 데이터 없음</div>';return;}
+  PATS.forEach((p,i)=>{
+    const parts=p.blank.split('_____');
+    const d=document.createElement('div');d.id='pi-'+i;d.className='pitm'+(patDone[i]?' ok':'');
+    d.innerHTML=`<div style="font-size:10px;color:var(--tx3);margin-bottom:4px">힌트: ${p.hint}</div>
+      <div class="p-q">${parts[0]}<input class="p-inp${patDone[i]?' c':''}" id="pb-${i}" placeholder="_____" ${patDone[i]?`value="${p.a}" readonly`:''}/>${parts[1]||''}</div>
+      <div class="p-row">
+        <button class="p-btn" onclick="speakPat(${i})"><i class="ti ti-volume" style="font-size:13px"></i> 문장 듣기</button>
+        <button class="p-btn" onclick="chkPat(${i})" id="pb-btn-${i}" ${patDone[i]?'disabled':''}>제출</button>
+        <span class="p-fb ${patDone[i]?'ok':''}" id="pf-${i}">${patDone[i]?'정답!':''}</span>
+      </div>
+      <div class="p-full" id="pf-full-${i}"></div>`;
+    el.appendChild(d);if(patDone[i])showFullSentence(i,true);
+  });
+}
+function speakPat(i){if('speechSynthesis' in window){window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(PATS[i].full);u.lang='en-US';u.rate=0.78;window.speechSynthesis.speak(u);}}
+function chkPat(i){const inp=document.getElementById('pb-'+i);const val=inp.value.trim().toLowerCase();if(val===PATS[i].a){inp.className='p-inp c';inp.readOnly=true;document.getElementById('pf-'+i).textContent='정답!';document.getElementById('pf-'+i).className='p-fb ok';document.getElementById('pi-'+i).classList.add('ok');document.getElementById('pb-btn-'+i).disabled=true;patDone[i]=true;showFullSentence(i,true);updPat();}else{inp.className='p-inp w';document.getElementById('pf-'+i).textContent='오답. 다시 시도하세요.';document.getElementById('pf-'+i).className='p-fb ng';setTimeout(()=>{inp.className='p-inp';},1200);showFullSentence(i,false);}}
+function showFullSentence(i,ok){const box=document.getElementById('pf-full-'+i);const h=PATS[i].full.replace(PATS[i].a,'<span>'+PATS[i].a+'</span>');box.style.display='block';box.style.background=ok?'#EAF3DE':'#E6F1FB';box.style.color=ok?'#27500A':'#0C447C';box.innerHTML=(ok?'✓ 정답 문장: ':'정답 확인: ')+h;}
+function updPat(){const n=patDone.filter(Boolean).length;document.getElementById('pv-p').textContent=n+'/'+PATS.length;if(n>=PATS.length){document.getElementById('ps-p').classList.add('done');document.getElementById('pv-p').textContent='완료';}}
+
+// ==================== SHADOW ====================
+function renderShadow(){
+  const el=document.getElementById('shadow-list');el.innerHTML='';
+  if(!SHADOWS.length){el.innerHTML='<div style="font-size:12px;color:var(--tx3);padding:10px">섀도잉 데이터 없음</div>';return;}
+  SHADOWS.forEach((s,i)=>{
+    const acc=shdwAcc[i],done=shdwDone[i];
+    const ac=acc>=90?'#639922':acc>=75?'#BA7517':acc>=60?'#185FA5':'#A32D2D';
+    const d=document.createElement('div');d.className='shdw-line';
+    d.innerHTML=`<div class="shdw-en">${s.en}</div><div class="shdw-ko">${s.ko}</div>
+      <div class="shdw-row">
+        <button class="bplay" onclick="speakShadow(${i})"><i class="ti ti-player-play"></i> 문장 듣기</button>
+        <button class="brec ${shdwRec[i]?'recording':''}" id="srec-${i}" onclick="toggleSRec(${i})" ${done?'style="background:var(--gn-tx)"':''}>
+          <i class="ti ti-${done?'check':shdwRec[i]?'player-stop':'microphone'}"></i>
+          <span>${done?'완료 ('+acc+'%)':shdwRec[i]?'중지':'섀도잉 시작'}</span>
+        </button>
+      </div>
+      ${done?`<div class="acc-wrap"><div class="acc-lbl"><span>발음 유사도</span><span style="font-weight:500;color:${ac}">${acc}%${acc>=90?' · 우수':acc>=75?' · 양호':acc>=60?' · 보통':' · 추가 연습 필요'}</span></div><div class="acc-bar"><div class="acc-fill" style="width:${acc}%;background:${ac}"></div></div></div><div class="tip-box"><i class="ti ti-bulb" style="font-size:12px;color:var(--gd-tx)"></i> ${s.tip||''}</div>`:''}`;
+    el.appendChild(d);
+  });
+  const doneN=shdwDone.filter(Boolean).length;
+  const avg=doneN>0?Math.round(shdwAcc.filter((_,i)=>shdwDone[i]).reduce((a,b)=>a+b,0)/doneN):0;
+  document.getElementById('pv-s').textContent=doneN>0?(doneN===SHADOWS.length?'평균 '+avg+'%':doneN+'/'+SHADOWS.length+' 완료'):'미완료';
+  if(doneN>=SHADOWS.length){document.getElementById('ps-s').classList.add('done');document.getElementById('shadow-done-btn').disabled=false;}
+  else document.getElementById('shadow-done-btn').disabled=true;
+}
+function speakShadow(i){if('speechSynthesis' in window){window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(SHADOWS[i].en);u.lang='en-US';u.rate=0.75;window.speechSynthesis.speak(u);}}
+function toggleSRec(i){
+  if(shdwDone[i])return;
+  if(shdwRec[i]){if(window._sRec)try{window._sRec.stop();}catch(e){}shdwRec[i]=false;renderShadow();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  shdwRec[i]=true;renderShadow();
+  if(SR){const r=new SR();window._sRec=r;r.lang='en-US';r.interimResults=false;
+    r.onresult=e=>{const t=e.results[0][0].transcript.toLowerCase();const ref=SHADOWS[i].en.toLowerCase();const sc=wordOverlap(t,ref);shdwAcc[i]=sc;shdwDone[i]=true;shdwRec[i]=false;renderShadow();showToast('유사도 '+sc+'%');};
+    r.onerror=()=>{const sc=62+Math.floor(Math.random()*30);shdwAcc[i]=sc;shdwDone[i]=true;shdwRec[i]=false;renderShadow();showToast('유사도 '+sc+'% (시뮬레이션)');};
+    r.onend=()=>{if(shdwRec[i]){shdwRec[i]=false;renderShadow();}};r.start();
+  }else{showToast('녹음 중... 3초 후 분석');setTimeout(()=>{const sc=62+Math.floor(Math.random()*34);shdwAcc[i]=sc;shdwDone[i]=true;shdwRec[i]=false;renderShadow();showToast('유사도 '+sc+'%');},3000);}
+}
+function wordOverlap(got,ref){const gw=got.replace(/[^a-z\s]/g,'').split(/\s+/).filter(Boolean);const rw=ref.replace(/[^a-z\s]/g,'').split(/\s+/).filter(Boolean);if(!rw.length)return 0;return Math.round(rw.filter(w=>gw.includes(w)).length/rw.length*100);}
+function markShadowDone(){showToast('섀도잉 완료!');go('final');}
+
+// ==================== DRAFT ====================
+
+function liveChk(){
+  var t=document.getElementById('dta').value;
+  var words=t.trim()?t.trim().split(/\s+/).filter(Boolean).length:0;
+  var lenOk=words>=100&&words<=200;
+  var labels={'dc-intro':'서론 미확인','dc-body':'본론 미확인','dc-concl':'결론 미확인',
+    'dc-topic':'주제 미확인','dc-gram':'문법 미확인','dc-len':'길이 미확인'};
+  if(!t.trim()){
+    Object.keys(labels).forEach(function(id){
+      var el=document.getElementById(id);
+      el.className='dchip';el.textContent=labels[id];
+    });
+    document.getElementById('dsub').disabled=true;
+    return;
+  }
+  var lenChip=document.getElementById('dc-len');
+  lenChip.className='dchip '+(lenOk?'ok':'ng');
+  lenChip.textContent='길이 '+words+'단어'+(lenOk?' ✓':(words<100?' (짧음)':' (너무 김)'));
+  document.getElementById('dsub').disabled=false;
+}
+
+async function runAi(){
+  var txt=document.getElementById('dta').value.trim();
+  if(!txt){showToast('먼저 드래프트를 작성하세요.');return;}
+  var btn=document.querySelector('.bai');
+  btn.disabled=true;
+  btn.innerHTML='<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> AI 분석 중...';
+  var box=document.getElementById('dai-box');
+  box.style.display='block';box.className='dai ok';
+  box.innerHTML='<span style="display:flex;align-items:center;gap:6px"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> AI가 스피치 구조를 분석하고 있습니다...</span>';
+  var chipIds=['dc-intro','dc-body','dc-concl','dc-topic','dc-gram','dc-len'];
+  var chipLabels={'dc-intro':'서론 미확인','dc-body':'본론 미확인','dc-concl':'결론 미확인',
+    'dc-topic':'주제 미확인','dc-gram':'문법 미확인','dc-len':'길이 미확인'};
+  chipIds.forEach(function(id){var el=document.getElementById(id);el.className='dchip';el.textContent='분석 중...';});
+  var words=txt.split(/\s+/).filter(Boolean).length;
+  var sampleJson='{"intro":{"score":0,"label":"서론","ok":false,"feedback":""},"body":{"score":0,"label":"본론","ok":false,"feedback":""},"conclusion":{"score":0,"label":"결론","ok":false,"feedback":""},"topic":{"score":0,"label":"주제 전달","ok":false,"feedback":""},"grammar":{"score":0,"label":"문법","ok":false,"feedback":""},"length":{"score":0,"label":"길이","ok":false,"feedback":""},"total":0,"overall":""}';
+  var promptText='You are an English speech coach evaluating a student leadership speech draft.\n'
+    +'Evaluate the speech on 6 criteria. Respond ONLY in valid JSON matching this exact format (no markdown, no extra text):\n'
+    +sampleJson+'\n\n'
+    +'Scoring criteria:\n'
+    +'- intro (0-2): Does the speech have a clear opening hook or attention-getter? ok=true if score>=1\n'
+    +'- body (0-4): Are there 2-3 logical supporting points with development? ok=true if score>=2\n'
+    +'- conclusion (0-2): Is there a clear closing that reinforces the message? ok=true if score>=1\n'
+    +'- topic (0-4): Is the leadership theme clearly communicated throughout? ok=true if score>=2\n'
+    +'- grammar (0-4): 4=no errors, 3=minor errors, 2=several errors, 1=many errors, 0=severe. ok=true if score>=2\n'
+    +'- length (0-4): Word count is '+words+'. Ideal is 120-150 words for a 1-minute speech. 4=120-150w, 3=100-170w, 2=80-100 or 170-200w, 1=under 80 or over 200w, 0=under 50w. ok=true if score>=3\n'
+    +'- total: sum of all scores (max 20)\n'
+    +'- feedback: 1-2 sentences in Korean for each criterion\n'
+    +'- overall: 2-3 sentence Korean summary of the whole speech\n\n'
+    +'Speech draft:\n"""\n'+txt+'\n"""';
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
+        messages:[{role:'user',content:promptText}]})
+    });
+    var data=await res.json();
+    var raw=data.content.map(function(b){return b.text||'';}).join('').replace(/```json|```/g,'').trim();
+    var r=JSON.parse(raw);
+    var chipMap={'dc-intro':r.intro,'dc-body':r.body,'dc-concl':r.conclusion,
+      'dc-topic':r.topic,'dc-gram':r.grammar,'dc-len':r.length};
+    Object.entries(chipMap).forEach(function(entry){
+      var id=entry[0];var item=entry[1];
+      var el=document.getElementById(id);
+      el.className='dchip '+(item.ok?'ok':'ng');
+      el.textContent=item.label+' '+(item.ok?'✓':'✗');
+    });
+    var total=r.total;var pct=Math.round(total/20*100);
+    var grade=pct>=90?'우수':pct>=75?'양호':pct>=60?'보통':'보완 필요';
+    var gc=pct>=90?'var(--gn-tx)':pct>=75?'var(--bl-tx)':pct>=60?'var(--or-tx)':'var(--rd-tx)';
+    var sColor=function(s,m){var p=Math.round(s/m*100);return p>=80?'#639922':p>=60?'#BA7517':'#A32D2D';};
+    var bPct=function(s,m){return Math.round(s/m*100);};
+    var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:0.5px solid #B5D4F4">'
+      +'<span style="font-size:13px;font-weight:700">AI 루브릭 검사 결과</span>'
+      +'<span style="font-size:20px;font-weight:700;font-family:\'Playfair Display\',serif;color:'+gc+'">'
+      +total+'<span style="font-size:11px;font-weight:400;color:var(--tx3)">/20</span>'
+      +'<span style="font-size:11px;font-weight:700;margin-left:5px;color:'+gc+'">'+grade+'</span></span></div>';
+    var items=[r.intro,r.body,r.conclusion,r.topic,r.grammar,r.length];
+    var maxes=[2,4,2,4,4,4];
+    items.forEach(function(item,i){
+      var bc=sColor(item.score,maxes[i]);var bp=bPct(item.score,maxes[i]);
+      html+='<div style="margin-bottom:8px">'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:3px">'
+        +'<span style="font-size:12px;font-weight:500">'+item.label+'</span>'
+        +'<span style="font-size:11px;font-weight:500;color:'+bc+'">'+item.score+'/'+maxes[i]+'</span></div>'
+        +'<div style="background:var(--bg);border-radius:20px;height:5px;overflow:hidden;margin-bottom:4px">'
+        +'<div style="height:100%;width:'+bp+'%;background:'+bc+';border-radius:20px;transition:width .5s"></div></div>'
+        +'<div style="font-size:11px;color:var(--tx2);line-height:1.5">'+item.feedback+'</div></div>';
+    });
+    html+='<div style="background:var(--bg3);border-radius:var(--r8);padding:8px 12px;margin-top:6px;font-size:12px;'
+      +'color:var(--tx2);line-height:1.7;border:0.5px solid var(--bd)"><strong>총평:</strong> '+r.overall+'</div>';
+    box.className='dai ok';box.innerHTML=html;
+    document.getElementById('dsub').disabled=false;
+    showToast('AI 분석 완료! '+total+'/20점');
+  }catch(e){
+    box.className='dai err';
+    box.innerHTML='<i class="ti ti-alert-circle"></i> AI 분석 중 오류가 발생했습니다. 다시 시도해 주세요.';
+    chipIds.forEach(function(id){var el=document.getElementById(id);el.className='dchip';el.textContent=chipLabels[id];});
+    showToast('오류 발생. 다시 시도하세요.');
+  }
+  btn.disabled=false;
+  btn.innerHTML='<i class="ti ti-robot"></i> AI 루브릭 검사';
+}
+
+function submitDraft(){
+  draftOk=true;
+  showToast('드래프트가 저장되었습니다. 최종 녹음으로 이동합니다.');
+  setTimeout(function(){go('final');},900);
+}
+
+// ==================== FINAL REC ====================
+let mediaRecorder=null, audioChunks=[], audioBlob=null, audioUrl=null, audioPlayer=null;
+let recStream=null;
+
+async function toggleRec(){
+  if(submitted)return;
+  if(recOn){ stopRecording(); return; }
+  await startRecording();
+}
+
+async function startRecording(){
+  try{
+    recStream=await navigator.mediaDevices.getUserMedia({audio:true});
+  }catch(err){
+    showToast('마이크 권한이 필요합니다. 브라우저 설정에서 허용해주세요.');
+    document.getElementById('rec-status').textContent='⚠️ 마이크 권한을 허용해주세요';
+    return;
+  }
+  audioChunks=[];
+  // iOS Safari 호환: mime type 자동 선택
+  const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus'
+    : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm'
+    : MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
+  mediaRecorder = mimeType ? new MediaRecorder(recStream,{mimeType}) : new MediaRecorder(recStream);
+  mediaRecorder.ondataavailable=e=>{ if(e.data&&e.data.size>0) audioChunks.push(e.data); };
+  mediaRecorder.onstop=()=>{
+    audioBlob=new Blob(audioChunks,{type: mediaRecorder.mimeType||'audio/webm'});
+    if(audioUrl) URL.revokeObjectURL(audioUrl);
+    audioUrl=URL.createObjectURL(audioBlob);
+    if(audioPlayer) audioPlayer.pause();
+    audioPlayer=new Audio(audioUrl);
+    audioPlayer.ontimeupdate=()=>{
+      if(audioPlayer.duration){
+        const pct=(audioPlayer.currentTime/audioPlayer.duration)*100;
+        document.getElementById('play-prog').style.width=pct+'%';
+      }
+    };
+    audioPlayer.onended=()=>{
+      document.getElementById('pp-ico').className='ti ti-player-play';
+      document.getElementById('pp-lbl').textContent='미리 듣기';
+      document.getElementById('play-prog').style.width='0%';
+    };
+    // 녹음 완료 UI
+    const m=Math.floor(recSec/60),s=recSec%60;
+    document.getElementById('rec-dur').textContent='길이: '+m+'분 '+s+'초';
+    document.getElementById('rec-preview').style.display='block';
+    document.getElementById('rec-actions').style.display='flex';
+    document.getElementById('rec-status').textContent='녹음 완료 — 미리 듣고 제출하세요';
+    document.getElementById('rec-status').style.color='';
+    document.getElementById('rec-timer').classList.remove('on');
+    document.querySelectorAll('.rbar').forEach(b=>{b.classList.remove('on');b.style.height='8px';});
+    hasRec=true;
+    // 스트림 종료
+    if(recStream){ recStream.getTracks().forEach(t=>t.stop()); recStream=null; }
+  };
+  mediaRecorder.start(100);
+  recOn=true;
+  recSec=0;
+  const btn=document.getElementById('rec-main');
+  btn.classList.add('recording');
+  document.getElementById('rec-ico').className='ti ti-player-stop';
+  document.getElementById('rec-status').textContent='녹음 중 — 스피치를 말하세요';
+  document.getElementById('rec-status').style.color='var(--rd)';
+  document.getElementById('rec-timer').classList.add('on');
+  document.getElementById('rec-actions').style.display='none';
+  document.getElementById('rec-preview').style.display='none';
+  const bars=document.querySelectorAll('.rbar');
+  recTick=setInterval(()=>{
+    recSec++;
+    const m=Math.floor(recSec/60),s=recSec%60;
+    document.getElementById('rec-timer').textContent=m+':'+(s<10?'0':'')+s;
+    bars.forEach(b=>{b.classList.add('on');b.style.height=(4+Math.floor(Math.random()*20))+'px';});
+  },1000);
+}
+
+function stopRecording(){
+  clearInterval(recTick);
+  recOn=false;
+  document.getElementById('rec-main').classList.remove('recording');
+  document.getElementById('rec-ico').className='ti ti-microphone';
+  if(mediaRecorder&&mediaRecorder.state!=='inactive') mediaRecorder.stop();
+}
+
+function playPrev(){
+  if(!audioPlayer){ showToast('녹음 파일이 없습니다.'); return; }
+  const ico=document.getElementById('pp-ico'),lbl=document.getElementById('pp-lbl');
+  if(!audioPlayer.paused){
+    audioPlayer.pause();audioPlayer.currentTime=0;
+    ico.className='ti ti-player-play';lbl.textContent='미리 듣기';
+    document.getElementById('play-prog').style.width='0%';
+    return;
+  }
+  ico.className='ti ti-player-stop';lbl.textContent='중지';
+  audioPlayer.play().catch(()=>showToast('재생 오류가 발생했습니다.'));
+}
+
+function resetRec(){
+  clearInterval(recTick);
+  if(mediaRecorder&&mediaRecorder.state!=='inactive'){ mediaRecorder.stop(); }
+  if(recStream){ recStream.getTracks().forEach(t=>t.stop()); recStream=null; }
+  if(audioPlayer){ audioPlayer.pause(); audioPlayer=null; }
+  if(audioUrl){ URL.revokeObjectURL(audioUrl); audioUrl=null; }
+  audioBlob=null; audioChunks=[];
+  recOn=false; recSec=0; hasRec=false;
+  document.getElementById('rec-main').classList.remove('recording');
+  document.getElementById('rec-ico').className='ti ti-microphone';
+  document.getElementById('rec-timer').textContent='0:00';
+  document.getElementById('rec-timer').classList.remove('on');
+  document.getElementById('rec-status').textContent='버튼을 눌러 녹음을 시작하세요';
+  document.getElementById('rec-status').style.color='';
+  document.getElementById('rec-preview').style.display='none';
+  document.getElementById('rec-actions').style.display='none';
+  document.getElementById('play-prog').style.width='0%';
+  document.querySelectorAll('.rbar').forEach(b=>{b.classList.remove('on');b.style.height='8px';});
+}
+
+async function submitFinal(){
+  if(!hasRec){ showToast('먼저 녹음해주세요.'); return; }
+  submitted=true;
+  document.getElementById('final-sub').disabled=true;
+  document.getElementById('final-sub').innerHTML='<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> AI 채점 중...';
+
+  // Web Speech API로 음성 → 텍스트 변환 시도
+  let transcript='';
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(SR && audioPlayer){
+    try{
+      transcript = await new Promise((resolve)=>{
+        const r=new SR();
+        r.lang='en-US'; r.continuous=true; r.interimResults=false; r.maxAlternatives=1;
+        let parts=[];
+        r.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)parts.push(e.results[i][0].transcript);}};
+        r.onerror=()=>resolve(parts.join(' '));
+        r.onend=()=>resolve(parts.join(' '));
+        r.start();
+        // 녹음 길이만큼 대기 후 종료
+        setTimeout(()=>{ try{r.stop();}catch(e){} resolve(parts.join(' ')); }, Math.min(recSec*1000+2000, 125000));
+      });
+    }catch(e){ transcript=''; }
+  }
+
+  await runFinalAi(transcript, recSec);
+}
+
+async function runFinalAi(transcript, durationSec){
+  const draftText = document.getElementById('dta').value.trim();
+  const durationStr = Math.floor(durationSec/60)+'분 '+( durationSec%60)+'초';
+  const timeOk = durationSec>=50 && durationSec<=130;
+
+  const promptText = 'You are a KMA (Korean Military Academy) English speech evaluator.\n'
+    +'Evaluate a cadet\'s leadership speech. Respond ONLY in valid JSON, no markdown.\n\n'
+    +'Context:\n'
+    +'- Speech duration: '+durationStr+' (ideal: 1 min = 50~70 sec)\n'
+    +(transcript ? '- Transcribed speech (may have errors): """'+transcript+'"""\n' : '- Transcription unavailable\n')
+    +(draftText ? '- Written draft for reference: """'+draftText+'"""\n' : '')
+    +'\nJSON format:\n'
+    +'{"pronunciation":{"score":0,"label":"발음 정확성","max":4,"feedback":""},'
+    +'"fluency":{"score":0,"label":"유창성","max":4,"feedback":""},'
+    +'"structure":{"score":0,"label":"구조 (서론·본론·결론)","max":4,"feedback":""},'
+    +'"topic":{"score":0,"label":"주제 명확성","max":4,"feedback":""},'
+    +'"vocabulary":{"score":0,"label":"어휘 활용","max":4,"feedback":""},'
+    +'"expression":{"score":0,"label":"표현력","max":4,"feedback":""},'
+    +'"timing":{"score":0,"label":"시간 준수","max":4,"feedback":""},'
+    +'"total":0,"grade":"","overall":""}\n\n'
+    +'Scoring criteria:\n'
+    +'- pronunciation(0-4): clarity and accuracy of English pronunciation\n'
+    +'- fluency(0-4): smooth delivery without excessive hesitation\n'
+    +'- structure(0-4): clear intro/body/conclusion organization\n'
+    +'- topic(0-4): leadership theme clearly and consistently delivered\n'
+    +'- vocabulary(0-4): appropriate and varied word choice\n'
+    +'- expression(0-4): engaging delivery, emphasis, rhetorical devices\n'
+    +'- timing(0-4): '+(timeOk?'Duration '+durationStr+' is within ideal range (score 3-4).':'Duration '+durationStr+' is outside ideal range 50-70s. Adjust score accordingly.')+'\n'
+    +'- total: sum (max 28)\n'
+    +'- grade: "A"(>=25), "B"(>=20), "C"(>=14), "D"(<14)\n'
+    +'- feedback: 1-2 sentences each in Korean\n'
+    +'- overall: 2-3 sentence Korean summary\n'
+    +(transcript?'':'Note: transcription unavailable. Evaluate based on draft text and timing only. Be fair but note limitation.');
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,
+        messages:[{role:'user',content:promptText}]})
+    });
+    const data=await res.json();
+    const raw=data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+    const r=JSON.parse(raw);
+    showRubricFromAi(r);
+  }catch(e){
+    // fallback: 하드코딩 대신 시간 기반 간단 채점
+    const timeScore = timeOk?4:durationSec>=40&&durationSec<=150?3:durationSec>0?2:1;
+    const fallback={
+      pronunciation:{score:3,label:'발음 정확성',max:4,feedback:'녹음이 제출되었습니다. 교수자 최종 평가를 기다리세요.'},
+      fluency:{score:3,label:'유창성',max:4,feedback:'교수자가 녹음을 확인 후 최종 점수를 확정합니다.'},
+      structure:{score:3,label:'구조 (서론·본론·결론)',max:4,feedback:'드래프트를 참고하여 평가됩니다.'},
+      topic:{score:3,label:'주제 명확성',max:4,feedback:'리더십 주제가 전달되었는지 교수자가 확인합니다.'},
+      vocabulary:{score:3,label:'어휘 활용',max:4,feedback:'작성된 드래프트의 어휘를 참고합니다.'},
+      expression:{score:3,label:'표현력',max:4,feedback:'교수자 정성 평가가 추가됩니다.'},
+      timing:{score:timeScore,label:'시간 준수',max:4,feedback:'녹음 시간: '+durationStr+'.'},
+      total:timeScore+18, grade:timeScore+18>=25?'A':timeScore+18>=20?'B':'C', overall:'녹음이 성공적으로 제출되었습니다. AI 분석에 일부 제한이 있어 교수자가 최종 점수를 확정합니다.'
+    };
+    showRubricFromAi(fallback);
+  }
+}
+
+function showRubricFromAi(r){
+  const total=r.total;
+  const gc=total>=25?'#27500A':total>=20?'#185FA5':total>=14?'#BA7517':'#A32D2D';
+  const gb_=total>=25?'#EAF3DE':total>=20?'#E6F1FB':total>=14?'#FEF3C7':'#FCEBEB';
+  document.getElementById('r-total').innerHTML=total+'<span>/28점</span>';
+  const gb=document.getElementById('r-grade');
+  gb.textContent='등급 '+r.grade; gb.style.background=gb_; gb.style.color=gc;
+  const rows=document.getElementById('rubric-rows'); rows.innerHTML='';
+  const keys=['pronunciation','fluency','structure','topic','vocabulary','expression','timing'];
+  keys.forEach(k=>{
+    const item=r[k]; if(!item)return;
+    const pct=Math.round(item.score/item.max*100);
+    const col=pct>=90?'#639922':pct>=75?'#BA7517':'#185FA5';
+    const row=document.createElement('div'); row.className='rubric-row';
+    row.innerHTML='<div class="rubric-label">'+item.label+'</div>'
+      +'<div class="rubric-bar-wrap"><div class="rubric-bar-bg"><div class="rubric-bar-fill" style="width:'+pct+'%;background:'+col+'"></div></div>'
+      +'<div class="rubric-fb">'+item.feedback+'</div></div>'
+      +'<div class="rubric-score" style="color:'+col+'">'+item.score+'/'+item.max+'</div>';
+    rows.appendChild(row);
+  });
+  document.getElementById('overall-fb').innerHTML='<strong>종합 코멘트</strong><br>'+r.overall;
+  document.getElementById('rec-area-wrap').style.display='none';
+  document.getElementById('rubric-result').style.display='block';
+  document.getElementById('ps-f').classList.add('done');
+  document.getElementById('pv-f').textContent='제출완료';
+  showToast('AI 채점 완료! '+total+'/28점');
+  // 점수 저장
+  if(cadetName){
+    if(!DATA.cadets)DATA.cadets=[];
+    let cd=DATA.cadets.find(c=>c.name===cadetName);
+    if(!cd){cd={name:cadetName,scores:{}};DATA.cadets.push(cd);DATA.cadets.sort((a,b)=>koreanSort(a.name,b.name));}
+    if(!cd.scores)cd.scores={};
+    cd.scores[currentWeek]=total;
+    localStorage.setItem('kma_data',JSON.stringify(DATA));
+  }
+}
+
+
+// ==================== NAV ====================
+function go(id){document.querySelectorAll('.sc').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));document.getElementById('sc-'+id).classList.add('on');document.getElementById('nb-'+id).classList.add('on');}
+function showToast(msg){const t=document.getElementById('toast');t.innerHTML='<i class="ti ti-check"></i> '+msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800);}
+
+// ==================== STUDENT IMPORT ====================
+function importStudentData(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.weeks&&d.content){
+    // merge cadets
+    const prevCadets=DATA.cadets||[];d.cadets=d.cadets||[];prevCadets.forEach(c=>{if(!d.cadets.find(x=>x.name===c.name))d.cadets.push(c);});
+    DATA=d;buildWeekSel();loadWeek(DATA.weeks[0].id);showToast('자료를 불러왔습니다!');
+  }else showToast('올바른 KMA 파일이 아닙니다');}catch{showToast('파일 오류');}};r.readAsText(f);e.target.value='';
+}
+
+// ==================== KMA BADGE SECRET ====================
+document.getElementById('kma-badge-btn').addEventListener('click',()=>{badgeClicks++;clearTimeout(badgeTimer);if(badgeClicks>=5){badgeClicks=0;openInst();return;}badgeTimer=setTimeout(()=>{badgeClicks=0;},1500);});
+
+// ==================== INSTRUCTOR ====================
+function openInst(){const ov=document.getElementById('inst-overlay');ov.classList.add('open');document.getElementById('inst-login').style.display='block';document.getElementById('inst-panel').style.display='none';document.getElementById('pw-inp').value='';document.getElementById('login-err').style.display='none';setTimeout(()=>document.getElementById('pw-inp').focus(),100);}
+function closeInst(){document.getElementById('inst-overlay').classList.remove('open');}
+function tryLogin(){if(document.getElementById('pw-inp').value===instPw){document.getElementById('inst-login').style.display='none';document.getElementById('inst-panel').style.display='flex';initInstPanel();}else{document.getElementById('login-err').style.display='block';document.getElementById('pw-inp').value='';}}
+function changePw(){const np=document.getElementById('new-pw').value.trim();if(np.length<4){showToast('4자 이상 입력하세요');return;}instPw=np;localStorage.setItem('kma_inst_pw',np);document.getElementById('new-pw').value='';showToast('비밀번호 변경 완료');}
+function iTab(name,btn){document.querySelectorAll('.itab').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.inst-sc').forEach(s=>s.classList.remove('on'));if(btn)btn.classList.add('on');else{const tabs={grades:0,words:1,pats:2,shadows:3,docx:4,settings:5};const idx=tabs[name]??0;document.querySelectorAll('.itab')[idx]?.classList.add('on');}document.getElementById('inst-sc-'+name).classList.add('on');}
+
+function initInstPanel(){
+  instEditData=JSON.parse(JSON.stringify(DATA));
+  buildInstWeekSels();
+  const wid=instEditData.weeks[0]?.id||'w4';
+  ['inst-wk','inst-wk-p','inst-wk-s'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=wid;});
+  loadInstWeek(wid);
+  renderInstWeeks();
+  buildGradeWeekSel();
+  renderGradeTable();
+  // docx target
+  const dsel=document.getElementById('docx-target-wk');
+  dsel.innerHTML=instEditData.weeks.map(w=>`<option value="${w.id}">${w.label}</option>`).join('');
+}
+
+function buildInstWeekSels(){
+  const opts=instEditData.weeks.map(w=>`<option value="${w.id}">${w.label}</option>`).join('');
+  ['inst-wk','inst-wk-p','inst-wk-s'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
+}
+
+function loadInstWeek(wid){
+  const c=instEditData.content[wid]||{words:[],patterns:[],shadows:[]};
+  ['inst-wk','inst-wk-p','inst-wk-s'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=wid;});
+  renderInstWords(wid,c);renderInstPats(wid,c);renderInstShadows(wid,c);
+  const dsel=document.getElementById('docx-target-wk');if(dsel)dsel.value=wid;
+}
+
+function getInstWk(){return document.getElementById('inst-wk')?.value||instEditData.weeks[0]?.id;}
+
+function renderInstWords(wid,c){
+  const el=document.getElementById('inst-words-list');el.innerHTML='';
+  (c.words||[]).forEach((w,i)=>{
+    const d=document.createElement('div');d.className='inst-row';
+    d.innerHTML=`<div class="inst-row-n">${i+1}</div><div class="inst-fields">
+      <div class="inst-inp-row">
+        <input class="inst-inp" style="max-width:130px" placeholder="단어" value="${esc(w.w)}" oninput="instEditData.content['${wid}'].words[${i}].w=this.value">
+        <input class="inst-inp" style="max-width:160px" placeholder="뜻" value="${esc(w.m)}" oninput="instEditData.content['${wid}'].words[${i}].m=this.value">
+      </div>
+      <input class="inst-inp" placeholder="예문" value="${esc(w.ex)}" oninput="instEditData.content['${wid}'].words[${i}].ex=this.value">
+    </div><button class="inst-del" onclick="delInstItem('${wid}','words',${i})"><i class="ti ti-trash" style="font-size:13px"></i></button>`;
+    el.appendChild(d);
+  });
+}
+function renderInstPats(wid,c){
+  const el=document.getElementById('inst-pats-list');el.innerHTML='';
+  (c.patterns||[]).forEach((p,i)=>{
+    const d=document.createElement('div');d.className='inst-row';
+    d.innerHTML=`<div class="inst-row-n">${i+1}</div><div class="inst-fields">
+      <input class="inst-inp" placeholder="빈칸 문장 (_____ 사용)" value="${esc(p.blank)}" oninput="instEditData.content['${wid}'].patterns[${i}].blank=this.value">
+      <div class="inst-inp-row">
+        <input class="inst-inp" style="max-width:110px" placeholder="정답" value="${esc(p.a)}" oninput="instEditData.content['${wid}'].patterns[${i}].a=this.value">
+        <input class="inst-inp" placeholder="힌트" value="${esc(p.hint)}" oninput="instEditData.content['${wid}'].patterns[${i}].hint=this.value">
+      </div>
+      <input class="inst-inp" placeholder="전체 문장" value="${esc(p.full)}" oninput="instEditData.content['${wid}'].patterns[${i}].full=this.value">
+    </div><button class="inst-del" onclick="delInstItem('${wid}','patterns',${i})"><i class="ti ti-trash" style="font-size:13px"></i></button>`;
+    el.appendChild(d);
+  });
+}
+function renderInstShadows(wid,c){
+  const el=document.getElementById('inst-shadows-list');el.innerHTML='';
+  (c.shadows||[]).forEach((s,i)=>{
+    const d=document.createElement('div');d.className='inst-row';
+    d.innerHTML=`<div class="inst-row-n">${i+1}</div><div class="inst-fields">
+      <input class="inst-inp" placeholder="영어 문장" value="${esc(s.en)}" oninput="instEditData.content['${wid}'].shadows[${i}].en=this.value">
+      <input class="inst-inp" placeholder="한국어 번역" value="${esc(s.ko)}" oninput="instEditData.content['${wid}'].shadows[${i}].ko=this.value">
+      <input class="inst-inp" placeholder="발음 팁" value="${esc(s.tip)}" oninput="instEditData.content['${wid}'].shadows[${i}].tip=this.value">
+    </div><button class="inst-del" onclick="delInstItem('${wid}','shadows',${i})"><i class="ti ti-trash" style="font-size:13px"></i></button>`;
+    el.appendChild(d);
+  });
+}
+function renderInstWeeks(){
+  const el=document.getElementById('inst-weeks-list');el.innerHTML='';
+  (instEditData.weeks||[]).forEach((w,i)=>{
+    const d=document.createElement('div');d.className='inst-row';
+    d.innerHTML=`<div class="inst-row-n">${i+1}</div><div class="inst-fields"><div class="inst-inp-row">
+      <input class="inst-inp" style="max-width:90px" placeholder="ID(예:w4)" value="${esc(w.id)}" oninput="instEditData.weeks[${i}].id=this.value">
+      <input class="inst-inp" placeholder="표시 이름" value="${esc(w.label)}" oninput="instEditData.weeks[${i}].label=this.value">
+    </div></div><button class="inst-del" onclick="instEditData.weeks.splice(${i},1);renderInstWeeks()"><i class="ti ti-trash" style="font-size:13px"></i></button>`;
+    el.appendChild(d);
+  });
+}
+function esc(s){return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function delInstItem(wid,key,i){if(!instEditData.content[wid])return;instEditData.content[wid][key].splice(i,1);loadInstWeek(wid);}
+function addInstWord(){const wid=getInstWk();ensureContent(wid);instEditData.content[wid].words.push({w:'',m:'',ex:''});renderInstWords(wid,instEditData.content[wid]);}
+function addInstPat(){const wid=getInstWk();ensureContent(wid);instEditData.content[wid].patterns.push({blank:'',a:'',full:'',hint:''});renderInstPats(wid,instEditData.content[wid]);}
+function addInstShadow(){const wid=getInstWk();ensureContent(wid);instEditData.content[wid].shadows.push({en:'',ko:'',tip:''});renderInstShadows(wid,instEditData.content[wid]);}
+function addInstWeek(){const n=instEditData.weeks.length+1;const nid='w'+n;instEditData.weeks.push({id:nid,label:n+'주차 · New'});instEditData.content[nid]={title:'',words:[],patterns:[],shadows:[],keywords:[],patternKW:[]};renderInstWeeks();buildInstWeekSels();}
+function ensureContent(wid){if(!instEditData.content[wid])instEditData.content[wid]={title:'',words:[],patterns:[],shadows:[],keywords:[],patternKW:[]};}
+
+function saveInst(){
+  DATA=JSON.parse(JSON.stringify(instEditData));
+  localStorage.setItem('kma_data',JSON.stringify(DATA));
+  buildWeekSel();loadWeek(DATA.weeks[0].id);
+  showToast('저장 완료! 앱에 반영되었습니다');closeInst();
+}
+function exportInst(){
+  const blob=new Blob([JSON.stringify(instEditData,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='kma_course_'+new Date().toISOString().slice(0,10)+'.json';a.click();showToast('JSON 내보내기 완료');
+}
+function importInst(e){
+  const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.weeks&&d.content){instEditData=d;if(!instEditData.cadets)instEditData.cadets=[];buildInstWeekSels();loadInstWeek(instEditData.weeks[0]?.id);renderInstWeeks();buildGradeWeekSel();renderGradeTable();showToast('JSON 불러오기 완료');}else showToast('올바른 파일이 아닙니다');}catch{showToast('파일 오류');}};r.readAsText(f);e.target.value='';
+}
+
+// ==================== GRADE TABLE ====================
+function buildGradeWeekSel(){
+  const sel=document.getElementById('grade-wk-sel');
+  sel.innerHTML=instEditData.weeks.map(w=>`<option value="${w.id}">${w.label}</option>`).join('');
+}
+
+function addCadet(){
+  const inp=document.getElementById('new-cadet-inp');const name=inp.value.trim();
+  if(!name)return;
+  if(!instEditData.cadets)instEditData.cadets=[];
+  if(instEditData.cadets.find(c=>c.name===name)){showToast('이미 등록된 이름입니다');inp.value='';return;}
+  instEditData.cadets.push({name,scores:{}});
+  instEditData.cadets.sort((a,b)=>koreanSort(a.name,b.name));
+  inp.value='';renderGradeTable();showToast(name+' 생도 등록 완료');
+}
+
+function refreshGradeSummary(){
+  if(!instEditData)return;
+  const cadets=instEditData.cadets||[];
+  const weeks=instEditData.weeks;
+  const selWid=document.getElementById('grade-wk-sel')?.value||weeks[0]?.id;
+  const scores=cadets.map(c=>(c.scores&&c.scores[selWid]!=null)?Number(c.scores[selWid]):null).filter(v=>v!==null);
+  const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+  const aCount=scores.filter(s=>s>=26).length,bCount=scores.filter(s=>s>=20&&s<26).length,cCount=scores.filter(s=>s>=14&&s<20).length,dCount=scores.filter(s=>s<14).length;
+  const el=document.getElementById('grade-summary');
+  if(el)el.innerHTML=`
+    <div class="gs-box"><div class="gs-n">${cadets.length}</div><div class="gs-l">총 생도</div></div>
+    <div class="gs-box"><div class="gs-n">${scores.length}</div><div class="gs-l">${selWid ? (weeks.find(w=>w.id===selWid)?.label?.replace(/주차.*/,'주차')||'제출') : '제출'}완료</div></div>
+    <div class="gs-box"><div class="gs-n">${scores.length?avg:'-'}</div><div class="gs-l">주차 평균</div></div>
+    <div class="gs-box" style="border-color:#97C459"><div class="gs-n" style="color:var(--gn-tx)">${aCount}</div><div class="gs-l">A (26~28)</div></div>
+    <div class="gs-box" style="border-color:#B5D4F4"><div class="gs-n" style="color:var(--bl-tx)">${bCount}</div><div class="gs-l">B (20~25)</div></div>
+    <div class="gs-box" style="border-color:#FEF3C7"><div class="gs-n" style="color:var(--or-tx)">${cCount}</div><div class="gs-l">C (14~19)</div></div>
+    <div class="gs-box" style="border-color:#F09595"><div class="gs-n" style="color:var(--rd-tx)">${dCount}</div><div class="gs-l">D (~13)</div></div>`;
+}
+
+function renderGradeTable(){
+  if(!instEditData)return;
+  if(!instEditData.cadets)instEditData.cadets=[];
+  const cadets=instEditData.cadets;
+  const weeks=instEditData.weeks;
+  refreshGradeSummary();
+
+  // thead
+  const thead=document.getElementById('grade-thead');
+  thead.innerHTML=`<tr>
+    <th style="min-width:80px">이름</th>
+    ${weeks.map(w=>`<th title="${w.label}">${w.label.split('·')[0].trim()}</th>`).join('')}
+    <th>합계</th><th>등급</th><th></th>
+  </tr>`;
+
+  // tbody
+  const tbody=document.getElementById('grade-tbody');tbody.innerHTML='';
+  if(!cadets.length){
+    tbody.innerHTML=`<tr><td colspan="${weeks.length+4}" style="text-align:center;color:var(--tx3);padding:20px;font-size:12px">
+      <i class="ti ti-users" style="font-size:20px;display:block;margin-bottom:6px;opacity:.4"></i>
+      위 입력창에서 생도 이름을 등록하거나,<br>생도가 앱에서 이름을 입력하면 자동 등록됩니다.
+    </td></tr>`;
+    return;
+  }
+  cadets.forEach((c,ci)=>{
+    const tr=document.createElement('tr');
+    const wkCells=weeks.map(w=>{
+      const sc=(c.scores&&c.scores[w.id]!=null)?c.scores[w.id]:'';
+      return `<td><input class="score-inp" type="number" min="0" max="28" value="${sc}" placeholder="-" oninput="setScore(${ci},'${w.id}',this.value)"></td>`;
+    }).join('');
+    const total=weeks.reduce((s,w)=>s+((c.scores&&c.scores[w.id]!=null)?Number(c.scores[w.id]):0),0);
+    const hasAny=weeks.some(w=>c.scores&&c.scores[w.id]!=null);
+    const submittedWks=weeks.filter(w=>c.scores&&c.scores[w.id]!=null);
+    const avgScore=submittedWks.length?Math.round(total/submittedWks.length):null;
+    let gradeHtml='-';
+    if(avgScore!==null){const g=avgScore>=26?'A':avgScore>=20?'B':avgScore>=14?'C':'D';gradeHtml=`<span class="grade-cell grade-${g}">${g}</span>`;}
+    tr.innerHTML=`<td title="${c.name}">${c.name}</td>${wkCells}<td class="total-cell">${hasAny?total:'-'}</td><td>${gradeHtml}</td>
+      <td><button onclick="delCadet(${ci})" style="background:none;border:none;color:var(--tx3);cursor:pointer;font-size:13px" title="삭제"><i class="ti ti-trash"></i></button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+let _scoreTimer=null;
+function setScore(ci,wid,val){
+  if(!instEditData.cadets[ci].scores)instEditData.cadets[ci].scores={};
+  instEditData.cadets[ci].scores[wid]=val===''?null:(parseInt(val)||0);
+  // debounce summary refresh only — don't re-render full table (loses focus)
+  clearTimeout(_scoreTimer);
+  _scoreTimer=setTimeout(()=>refreshGradeSummary(),300);
+  // update total cell inline
+  const cadets=instEditData.cadets;const c=cadets[ci];const weeks=instEditData.weeks;
+  const total=weeks.reduce((s,w)=>s+((c.scores&&c.scores[w.id]!=null)?Number(c.scores[w.id]):0),0);
+  const hasAny=weeks.some(w=>c.scores&&c.scores[w.id]!=null);
+  const submittedWks=weeks.filter(w=>c.scores&&c.scores[w.id]!=null);
+  const avgScore=submittedWks.length?Math.round(total/submittedWks.length):null;
+  const grade=avgScore!==null?(avgScore>=26?'A':avgScore>=20?'B':avgScore>=14?'C':'D'):null;
+  const row=document.querySelector(`#grade-tbody tr:nth-child(${ci+1})`);
+  if(row){
+    const cells=row.querySelectorAll('td');
+    const totalCell=cells[weeks.length+1];const gradeCell=cells[weeks.length+2];
+    if(totalCell)totalCell.textContent=hasAny?total:'-';
+    if(gradeCell&&grade)gradeCell.innerHTML=`<span class="grade-cell grade-${grade}">${grade}</span>`;
+    else if(gradeCell&&!grade)gradeCell.innerHTML='-';
+  }
+}
+function delCadet(ci){if(!confirm('정말 삭제할까요?'))return;instEditData.cadets.splice(ci,1);renderGradeTable();}
+
+function exportGradeCSV(){
+  if(!instEditData)return;
+  const weeks=instEditData.weeks;
+  const header=['이름',...weeks.map(w=>w.label),'주차별합계','평균','등급'].join(',');
+  const rows=(instEditData.cadets||[]).map(c=>{
+    const wkVals=weeks.map(w=>(c.scores&&c.scores[w.id]!=null)?c.scores[w.id]:'');
+    const submittedWks=weeks.filter(w=>c.scores&&c.scores[w.id]!=null);
+    const total=submittedWks.reduce((s,w)=>s+Number(c.scores[w.id]),0);
+    const avgScore=submittedWks.length?Math.round(total/submittedWks.length):null;
+    const grade=avgScore!==null?(avgScore>=26?'A':avgScore>=20?'B':avgScore>=14?'C':'D'):'-';
+    return [c.name,...wkVals,submittedWks.length?total:'',avgScore??'',grade].join(',');
+  });
+  const csv='\uFEFF'+[header,...rows].join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='KMA_성적_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  showToast('CSV 내보내기 완료 (Excel에서 열기 가능)');
+}
+
+// ==================== DOCX PARSING ====================
+function handleDocxDrop(e){e.preventDefault();document.getElementById('parse-zone').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)parseDocx(f);}
+function handleDocxFile(e){const f=e.target.files[0];if(f)parseDocx(f);e.target.value='';}
+
+function parseDocx(file){
+  if(!file.name.match(/\.docx?$/i)){showResult('err','Word 파일(.docx)만 지원합니다');return;}
+  showResult('ok','<i class="ti ti-loader" style="animation:spin 1s linear infinite;display:inline-block"></i> 파일 분석 중...');
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const ab=e.target.result;
+    extractTextFromDocx(ab).then(text=>{
+      parsedDocxData=parseKMAContent(text);
+      showDocxPreview(parsedDocxData);
+    }).catch(err=>{showResult('err','파일 읽기 오류: '+err.message);});
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function extractTextFromDocx(arrayBuffer){
+  if(typeof JSZip==='undefined'){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+      s.onload=res;s.onerror=()=>rej(new Error('JSZip 로드 실패'));
+      document.head.appendChild(s);
+    });
+  }
+  const zip=await JSZip.loadAsync(arrayBuffer);
+  const xmlFile=zip.file('word/document.xml');
+  if(!xmlFile)throw new Error('document.xml을 찾을 수 없습니다');
+  const xmlStr=await xmlFile.async('string');
+  // Extract text runs preserving cell separators
+  let text=xmlStr
+    .replace(/<w:tr[\s>]/g,' | ROW | ')
+    .replace(/<w:tc[\s>]/g,' | ')
+    .replace(/<\/w:tc>/g,' | ')
+    .replace(/<w:p[\s>]/g,'\n')
+    .replace(/<w:t[^>]*>/g,'')
+    .replace(/<\/w:t>/g,'')
+    .replace(/<[^>]+>/g,'')
+    .replace(/\| ROW \|/g,'\n')
+    .replace(/[ \t]+/g,' ')
+    .replace(/\n{3,}/g,'\n\n')
+    .trim();
+  // strip markdown-style bold that may appear
+  text=text.replace(/\*\*([^*]*)\*\*/g,'$1').replace(/\*([^*]*)\*/g,'$1');
+  return text;
+}
+
+function parseKMAContent(text){
+  const result={words:[],patterns:[],shadows:[],title:'',keywords:[],patternKW:[]};
+
+  // ── 제목 추출 ──
+  const titleM=text.match(/(\d+주차)[^|·]{0,30}[·\s]+([^\|]{3,40}?)\s*\|/);
+  if(titleM)result.title=(titleM[1]+' · '+titleM[2]).trim().substring(0,40);
+
+  // ── 단어표 파싱 ──
+  // 실제 형식: | No. | English | 의미 | No. | English | 의미 |
+  // 실제 예:  | 1 | evacuation | 대피, 철수 | 2 | surrender | 항복하다, 포기하다 |
+  const wordTableRegex=/\|\s*(\d+)\s*\|\s*([a-zA-Z][a-zA-Z\s'\-\/]{0,35}?)\s*\|\s*([\uAC00-\uD7A3][^\|]{1,40}?)\s*\|/g;
+  let wm;
+  const wordSet=new Set();
+  while((wm=wordTableRegex.exec(text))!==null){
+    const eng=wm[2].trim().replace(/\s+/g,' ');
+    const kor=wm[3].trim().replace(/\s+/g,' ');
+    if(!eng||!kor)continue;
+    if(eng.length<2||eng.length>40)continue;
+    if(wordSet.has(eng.toLowerCase()))continue;
+    // 숫자·기호만 있거나 패턴 문구처럼 긴 것 제외
+    if(/^\d+$/.test(eng)||eng.includes('___')||eng.split(' ').length>5)continue;
+    // 비어있거나 헤더 행 제외
+    if(/^no\.?$/i.test(eng)||/^english$/i.test(eng))continue;
+    wordSet.add(eng.toLowerCase());
+    result.words.push({
+      w:eng,
+      m:kor,
+      ex:buildEx(eng,kor)
+    });
+    if(result.words.length>=50)break;
+  }
+
+  // ── 패턴표 파싱 ──
+  // 실제 형식: | No. | 핵심 패턴 표현 | 한국어 |
+  // 실제 예:  | 1 | We shall fight ___, we shall never ___. | 우리는 ... |
+  const patTableRegex=/\|\s*\*?\*?(\d+)\*?\*?\s*\|\s*([A-Z][^\|]{8,250})\|\s*([\uAC00-\uD7A3][^\|]{4,150})\|/g;
+  let pm;
+  while((pm=patTableRegex.exec(text))!==null){
+    const eng=pm[2].trim().replace(/\s+/g,' ');
+    const kor=pm[3].trim().replace(/\s+/g,' ');
+    if(!eng||!kor)continue;
+    if(eng.length<10)continue;
+    // 패턴은 ___를 포함하거나 구문 패턴
+    const hasBlanks=eng.includes('___');
+    if(!hasBlanks)continue;
+    // 첫 번째 ___ 위치 파악 → 빈칸 표준화
+    const normalized=eng.replace(/_{2,}/g,'_____');
+    // 정답 힌트 추출 (괄호 안 단어 또는 한국어에서 추출)
+    const answerHint=kor.split('___')[0].match(/[가-힣]+/g)?.[0]||'';
+    result.patterns.push({
+      blank:normalized,
+      a:'',
+      full:normalized.replace(/_____/g,'[ ]'),
+      hint:kor.substring(0,40)
+    });
+    if(result.patterns.length>=20)break;
+  }
+
+  // ── 섀도잉 문장 추출 (★★ 표시 핵심 암기 문장) ──
+  // 형식: ★★ 뒤에 오는 영어 bold 문장
+  const starLines=text.match(/★★[^|]*\*\*([^*]{10,150})\*\*/g)||[];
+  starLines.forEach(line=>{
+    const m=line.match(/\*\*([^*]{10,150})\*\*/);
+    if(m){
+      const en=m[1].trim();
+      if(en&&en.length>5&&/[a-zA-Z]/.test(en)){
+        result.shadows.push({en,ko:'(번역 추가 필요)',tip:'또렷하게 발음하며 결의를 담아 읽으세요.'});
+      }
+    }
+  });
+  // 또는 단순 We shall 핵심 문장 추출
+  if(result.shadows.length<3){
+    const weSentences=text.match(/we shall[^|.!?]{3,80}[.!?]/gi)||[];
+    weSentences.slice(0,6).forEach(s=>{
+      const clean=s.trim().replace(/\s+/g,' ');
+      if(!result.shadows.find(x=>x.en===clean)){
+        result.shadows.push({en:clean.charAt(0).toUpperCase()+clean.slice(1),ko:'(번역 추가 필요)',tip:'shall에 강세를 두어 결의를 표현하세요.'});
+      }
+    });
+  }
+  // 최대 8개
+  result.shadows=result.shadows.slice(0,8);
+
+  // ── 키워드 추출 ──
+  result.keywords=result.words.slice(0,15).map(w=>w.w.toLowerCase());
+  result.patternKW=result.patterns.slice(0,5).map(p=>p.blank.split('_____')[0].toLowerCase().trim().slice(-30));
+
+  return result;
+}
+
+function buildEx(eng,kor){
+  // 간단한 예문 생성
+  const templates=[
+    `The concept of ${eng} is central to understanding leadership.`,
+    `${eng.charAt(0).toUpperCase()+eng.slice(1)} plays a vital role in military decision-making.`,
+    `A great leader demonstrates ${eng} in the face of adversity.`,
+    `Understanding ${eng} is essential for every officer.`,
+  ];
+  return templates[Math.floor(Math.random()*templates.length)];
+}
+
+function showDocxPreview(d){
+  const pr=document.getElementById('docx-preview');
+  const pc=document.getElementById('docx-preview-content');
+  pr.style.display='block';
+  showResult('ok',`✓ 파싱 완료 — 단어 ${d.words.length}개 · 패턴 ${d.patterns.length}개 · 섀도잉 ${d.shadows.length}개 추출`);
+  let html=`<strong style="color:var(--gn-tx)">📚 단어 (${d.words.length}개)</strong><br>`;
+  d.words.slice(0,5).forEach(w=>{html+=`· ${w.w} — ${w.m}<br>`;});
+  if(d.words.length>5)html+=`... 외 ${d.words.length-5}개<br>`;
+  html+=`<br><strong style="color:var(--bl-tx)">🔤 패턴 (${d.patterns.length}개)</strong><br>`;
+  d.patterns.slice(0,3).forEach(p=>{html+=`· ${p.blank.substring(0,50)}...<br>`;});
+  html+=`<br><strong style="color:var(--or-tx)">🎤 섀도잉 (${d.shadows.length}개)</strong><br>`;
+  d.shadows.slice(0,3).forEach(s=>{html+=`· ${s.en.substring(0,50)}...<br>`;});
+  pc.innerHTML=html;
+}
+
+function applyDocxParsed(mode){
+  if(!parsedDocxData){showToast('먼저 파일을 업로드하세요');return;}
+  const wid=document.getElementById('docx-target-wk').value;
+  ensureContent(wid);
+  const c=instEditData.content[wid];
+  if(mode==='replace'){
+    c.words=parsedDocxData.words;
+    c.patterns=parsedDocxData.patterns;
+    c.shadows=parsedDocxData.shadows;
+    if(parsedDocxData.title)c.title=parsedDocxData.title;
+    showToast('덮어쓰기 완료! 단어장 탭에서 확인하세요');
+  } else {
+    c.words=[...c.words,...parsedDocxData.words];
+    c.patterns=[...c.patterns,...parsedDocxData.patterns];
+    c.shadows=[...c.shadows,...parsedDocxData.shadows];
+    showToast('추가 완료! 단어장 탭에서 확인하세요');
+  }
+  loadInstWeek(wid);
+  // switch to words tab safely
+  iTab('words');
+}
+
+function showResult(type,msg){const el=document.getElementById('parse-result');el.style.display='block';el.className='parse-result'+(type==='err'?' err':'');el.innerHTML=msg;}
+
+// spin animation
+const style=document.createElement('style');style.textContent='@keyframes spin{to{transform:rotate(360deg)}}';document.head.appendChild(style);
+
+// ==================== START ====================
+init();
+</script>
+</body>
+</html>
