@@ -251,6 +251,10 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 .stu-import-bar i{font-size:16px;flex-shrink:0}
 .stu-import-btn{background:var(--gd-tx);color:var(--gd-bg);border:none;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;white-space:nowrap}
 
+.draft-section{margin-bottom:10px}
+.draft-section-label{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:var(--tx2);margin-bottom:5px}
+.ds-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--ac);color:#fff;font-size:10px;font-weight:700;flex-shrink:0}
+.ds-hint{font-size:11px;font-weight:400;color:var(--tx3)}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 </style>
 </head>
@@ -366,15 +370,28 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 <div id="sc-draft" class="sc">
   <div class="card">
     <div class="ct"><i class="ti ti-edit"></i>스크립트 드래프트 · AI 루브릭 검사</div>
+    <!-- 평가 칩 -->
     <div class="dchips">
+      <span class="dchip" id="dc-summ">요약 미확인</span>
       <span class="dchip" id="dc-intro">서론 미확인</span>
       <span class="dchip" id="dc-body">본론 미확인</span>
       <span class="dchip" id="dc-concl">결론 미확인</span>
-      <span class="dchip" id="dc-topic">주제 미확인</span>
       <span class="dchip" id="dc-gram">문법 미확인</span>
       <span class="dchip" id="dc-len">길이 미확인</span>
     </div>
-    <textarea class="dta" id="dta" rows="7" placeholder="리더십 스피치를 작성하세요. 서론·본론·결론 구조로, 1분 스피치 기준 약 120~150단어가 적당합니다." oninput="liveChk()"></textarea>
+
+    <!-- Part 1: 낭독문 요약 -->
+    <div class="draft-section">
+      <div class="draft-section-label"><span class="ds-num">1</span>낭독문 요약 <span class="ds-hint">핵심 메시지 3~5문장 + 인상 깊은 문장 1~2개 인용</span></div>
+      <textarea class="dta" id="dta-summ" rows="3" placeholder="이 연설의 핵심 메시지는 ___입니다. 특히 '___'라는 문장이 인상 깊었습니다." oninput="liveChk()"></textarea>
+    </div>
+
+    <!-- Part 2: 나의 스피치 -->
+    <div class="draft-section">
+      <div class="draft-section-label"><span class="ds-num">2</span>나의 스피치 <span class="ds-hint">낭독문 주제와 연결해 서론·본론·결론으로 120~150단어</span></div>
+      <textarea class="dta" id="dta" rows="7" placeholder="[서론] 주의를 끄는 도입부로 시작하세요.&#10;&#10;[본론] 낭독문과 연결된 나의 경험이나 생각을 2~3가지 논점으로 전개하세요.&#10;&#10;[결론] 핵심 메시지를 강조하며 마무리하세요." oninput="liveChk()"></textarea>
+    </div>
+
     <div id="dai-box" class="dai ok" style="display:none"></div>
     <div class="dact">
       <button class="bai" onclick="runAi()"><i class="ti ti-robot"></i> AI 루브릭 검사</button>
@@ -827,23 +844,31 @@ function markShadowDone(){showToast('섀도잉 완료!');go('final');}
 // ==================== DRAFT ====================
 
 function liveChk(){
+  var summ=document.getElementById('dta-summ')?document.getElementById('dta-summ').value.trim():'';
   var t=document.getElementById('dta').value;
   var words=t.trim()?t.trim().split(/\s+/).filter(Boolean).length:0;
   var lenOk=words>=100&&words<=200;
-  var labels={'dc-intro':'서론 미확인','dc-body':'본론 미확인','dc-concl':'결론 미확인',
-    'dc-topic':'주제 미확인','dc-gram':'문법 미확인','dc-len':'길이 미확인'};
-  if(!t.trim()){
-    Object.keys(labels).forEach(function(id){
-      var el=document.getElementById(id);
-      el.className='dchip';el.textContent=labels[id];
-    });
+  // 요약 칩
+  var summChip=document.getElementById('dc-summ');
+  if(summChip){
+    var summOk=summ.length>20;
+    summChip.className='dchip '+(summOk?'ok':'');
+    summChip.textContent=summOk?'요약 ✓':'요약 미작성';
+  }
+  // 길이 칩
+  var lenChip=document.getElementById('dc-len');
+  var labels={'dc-intro':'서론 미확인','dc-body':'본론 미확인','dc-concl':'결론 미확인','dc-gram':'문법 미확인'};
+  if(!t.trim()&&!summ){
+    Object.keys(labels).forEach(function(id){var el=document.getElementById(id);if(el){el.className='dchip';el.textContent=labels[id];}});
+    if(lenChip){lenChip.className='dchip';lenChip.textContent='길이 미확인';}
     document.getElementById('dsub').disabled=true;
     return;
   }
-  var lenChip=document.getElementById('dc-len');
-  lenChip.className='dchip '+(lenOk?'ok':'ng');
-  lenChip.textContent='길이 '+words+'단어'+(lenOk?' ✓':(words<100?' (짧음)':' (너무 김)'));
-  document.getElementById('dsub').disabled=false;
+  if(lenChip){
+    lenChip.className='dchip '+(lenOk?'ok':'ng');
+    lenChip.textContent='길이 '+words+'단어'+(lenOk?' ✓':(words<100?' (짧음)':' (너무 김)'));
+  }
+  document.getElementById('dsub').disabled=!(summ.length>10);
 }
 
 async function runAi(){
@@ -860,21 +885,23 @@ async function runAi(){
     'dc-topic':'주제 미확인','dc-gram':'문법 미확인','dc-len':'길이 미확인'};
   chipIds.forEach(function(id){var el=document.getElementById(id);el.className='dchip';el.textContent='분석 중...';});
   var words=txt.split(/\s+/).filter(Boolean).length;
-  var sampleJson='{"intro":{"score":0,"label":"서론","ok":false,"feedback":""},"body":{"score":0,"label":"본론","ok":false,"feedback":""},"conclusion":{"score":0,"label":"결론","ok":false,"feedback":""},"topic":{"score":0,"label":"주제 전달","ok":false,"feedback":""},"grammar":{"score":0,"label":"문법","ok":false,"feedback":""},"length":{"score":0,"label":"길이","ok":false,"feedback":""},"total":0,"overall":""}';
-  var promptText='You are an English speech coach evaluating a student leadership speech draft.\n'
-    +'Evaluate the speech on 6 criteria. Respond ONLY in valid JSON matching this exact format (no markdown, no extra text):\n'
+  var summText=document.getElementById('dta-summ')?document.getElementById('dta-summ').value.trim():'';
+  var sampleJson='{"summary":{"score":0,"label":"낭독문 요약","ok":false,"feedback":""},"intro":{"score":0,"label":"서론","ok":false,"feedback":""},"body":{"score":0,"label":"본론","ok":false,"feedback":""},"conclusion":{"score":0,"label":"결론","ok":false,"feedback":""},"grammar":{"score":0,"label":"문법","ok":false,"feedback":""},"length":{"score":0,"label":"길이","ok":false,"feedback":""},"total":0,"overall":""}';
+  var promptText='You are a KMA English speech coach. A cadet wrote a 2-part draft: a summary of a famous speech they studied, then their own speech.\n'
+    +'Evaluate the ENTIRE draft on 6 criteria. Respond ONLY in valid JSON (no markdown):\n'
     +sampleJson+'\n\n'
     +'Scoring criteria:\n'
-    +'- intro (0-2): Does the speech have a clear opening hook or attention-getter? ok=true if score>=1\n'
-    +'- body (0-4): Are there 2-3 logical supporting points with development? ok=true if score>=2\n'
+    +'- summary (0-2): Does Part 1 clearly capture the key message of the studied speech and include at least one quoted sentence? ok=true if score>=1\n'
+    +'- intro (0-2): Does the cadet speech (Part 2) have a clear opening hook? ok=true if score>=1\n'
+    +'- body (0-4): Are there 2-3 logical supporting points connected to the studied speech theme? ok=true if score>=2\n'
     +'- conclusion (0-2): Is there a clear closing that reinforces the message? ok=true if score>=1\n'
-    +'- topic (0-4): Is the leadership theme clearly communicated throughout? ok=true if score>=2\n'
-    +'- grammar (0-4): 4=no errors, 3=minor errors, 2=several errors, 1=many errors, 0=severe. ok=true if score>=2\n'
-    +'- length (0-4): Word count is '+words+'. Ideal is 120-150 words for a 1-minute speech. 4=120-150w, 3=100-170w, 2=80-100 or 170-200w, 1=under 80 or over 200w, 0=under 50w. ok=true if score>=3\n'
-    +'- total: sum of all scores (max 20)\n'
-    +'- feedback: 1-2 sentences in Korean for each criterion\n'
-    +'- overall: 2-3 sentence Korean summary of the whole speech\n\n'
-    +'Speech draft:\n"""\n'+txt+'\n"""';
+    +'- grammar (0-4): Overall grammar accuracy across both parts. 4=no errors, 3=minor, 2=several, 1=many, 0=severe. ok=true if score>=2\n'
+    +'- length (0-4): Speech part word count is '+words+'. Ideal 120-150w. 4=120-150, 3=100-170, 2=80-100or170-200, 1=<80or>200. ok=true if score>=3\n'
+    +'- total: sum (max 16)\n'
+    +'- feedback: 1-2 sentences in Korean per criterion\n'
+    +'- overall: 2-3 sentence Korean summary with specific advice for memorization\n\n'
+    +(summText?'Part 1 - Summary:\n"""\n'+summText+'\n"""\n\n':'')
+    +'Part 2 - Cadet Speech:\n"""\n'+txt+'\n"""';
   try{
     var res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',headers:{'Content-Type':'application/json'},
@@ -884,8 +911,8 @@ async function runAi(){
     var data=await res.json();
     var raw=data.content.map(function(b){return b.text||'';}).join('').replace(/```json|```/g,'').trim();
     var r=JSON.parse(raw);
-    var chipMap={'dc-intro':r.intro,'dc-body':r.body,'dc-concl':r.conclusion,
-      'dc-topic':r.topic,'dc-gram':r.grammar,'dc-len':r.length};
+    var chipMap={'dc-summ':r.summary,'dc-intro':r.intro,'dc-body':r.body,
+      'dc-concl':r.conclusion,'dc-gram':r.grammar,'dc-len':r.length};
     Object.entries(chipMap).forEach(function(entry){
       var id=entry[0];var item=entry[1];
       var el=document.getElementById(id);
@@ -893,17 +920,17 @@ async function runAi(){
       el.textContent=item.label+' '+(item.ok?'✓':'✗');
     });
     var total=r.total;var pct=Math.round(total/20*100);
-    var grade=pct>=90?'우수':pct>=75?'양호':pct>=60?'보통':'보완 필요';
+    var grade=pct>=90?'우수':pct>=75?'양호':pct>=60?'보통':'보완 필요';  // /16 기준
     var gc=pct>=90?'var(--gn-tx)':pct>=75?'var(--bl-tx)':pct>=60?'var(--or-tx)':'var(--rd-tx)';
     var sColor=function(s,m){var p=Math.round(s/m*100);return p>=80?'#639922':p>=60?'#BA7517':'#A32D2D';};
     var bPct=function(s,m){return Math.round(s/m*100);};
     var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:0.5px solid #B5D4F4">'
       +'<span style="font-size:13px;font-weight:700">AI 루브릭 검사 결과</span>'
       +'<span style="font-size:20px;font-weight:700;font-family:\'Playfair Display\',serif;color:'+gc+'">'
-      +total+'<span style="font-size:11px;font-weight:400;color:var(--tx3)">/20</span>'
+      +total+'<span style="font-size:11px;font-weight:400;color:var(--tx3)">/16</span>'
       +'<span style="font-size:11px;font-weight:700;margin-left:5px;color:'+gc+'">'+grade+'</span></span></div>';
-    var items=[r.intro,r.body,r.conclusion,r.topic,r.grammar,r.length];
-    var maxes=[2,4,2,4,4,4];
+    var items=[r.summary,r.intro,r.body,r.conclusion,r.grammar,r.length];
+    var maxes=[2,2,4,2,4,4];
     items.forEach(function(item,i){
       var bc=sColor(item.score,maxes[i]);var bp=bPct(item.score,maxes[i]);
       html+='<div style="margin-bottom:8px">'
@@ -918,7 +945,7 @@ async function runAi(){
       +'color:var(--tx2);line-height:1.7;border:0.5px solid var(--bd)"><strong>총평:</strong> '+r.overall+'</div>';
     box.className='dai ok';box.innerHTML=html;
     document.getElementById('dsub').disabled=false;
-    showToast('AI 분석 완료! '+total+'/20점');
+    showToast('AI 분석 완료! '+total+'/16점');
   }catch(e){
     box.className='dai err';
     box.innerHTML='<i class="ti ti-alert-circle"></i> AI 분석 중 오류가 발생했습니다. 다시 시도해 주세요.';
