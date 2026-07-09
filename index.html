@@ -117,6 +117,12 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 .acc-fill{height:100%;border-radius:20px;transition:width .5s}
 .tip-box{font-size:11px;color:var(--tx2);background:var(--bg2);border:0.5px solid var(--bd);border-radius:6px;padding:6px 10px;margin-top:6px;line-height:1.5;display:flex;gap:5px}
 
+/* STEP BADGE */
+.step-badge{background:var(--nv);color:#e2e8f0;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.5px}
+.ref-sentence{background:var(--bg3);border:0.5px solid var(--bd);border-radius:var(--r8);padding:7px 11px;font-size:12px;color:var(--tx);line-height:1.6;cursor:pointer;transition:all .15s;display:flex;align-items:flex-start;gap:7px}
+.ref-sentence:hover{background:var(--gd-bg);border-color:var(--gd);color:var(--gd-tx)}
+.ref-sentence i{font-size:13px;flex-shrink:0;margin-top:1px;color:var(--tx3)}
+.ref-sentence:hover i{color:var(--gd-tx)}
 /* DRAFT */
 .dchips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
 .dchip{font-size:11px;padding:3px 9px;border-radius:20px;border:0.5px solid var(--bd);background:var(--bg3);color:var(--tx2);transition:all .2s}
@@ -250,12 +256,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 .stu-import-bar{background:var(--gd-bg);border:0.5px solid #EF9F27;border-radius:var(--r8);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--gd-tx)}
 .stu-import-bar i{font-size:16px;flex-shrink:0}
 .stu-import-btn{background:var(--gd-tx);color:var(--gd-bg);border:none;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;white-space:nowrap}
-
-.draft-section{margin-bottom:10px}
-.draft-section-label{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:var(--tx2);margin-bottom:5px}
-.ds-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--ac);color:#fff;font-size:10px;font-weight:700;flex-shrink:0}
-.ds-hint{font-size:11px;font-weight:400;color:var(--tx3)}
-@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -278,7 +278,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 <div class="hdr">
   <div class="hdr-l">
     <span class="kma-badge" id="kma-badge-btn">KMA</span>
-    <span class="hdr-t">영어발표와 연설 · 생도 학습 앱</span>
+    <span class="hdr-t">영어발표와 연설 · KMA 학습 앱 v5</span>
   </div>
   <div class="hdr-r">
     <span class="ci"><i class="ti ti-user" style="font-size:13px"></i><span id="cadet-name-disp">생도</span></span>
@@ -368,74 +368,114 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 
 <!-- ===== DRAFT ===== -->
 <div id="sc-draft" class="sc">
-  <div class="card">
-    <div class="ct"><i class="ti ti-edit"></i>스크립트 드래프트 · AI 루브릭 검사</div>
-    <!-- 평가 칩 -->
+
+  <!-- STEP 1: 주제 문장 선택 -->
+  <div class="card" id="draft-step1">
+    <div class="ct"><i class="ti ti-quote"></i>
+      <span>Step 1 · 핵심 주제 문장 선택</span>
+      <span class="step-badge">1 / 3</span>
+    </div>
+    <div class="info-box"><i class="ti ti-bulb"></i>
+      <span>오늘 학습한 연설문에서 <strong>가장 중요하다고 생각하는 문장 1개</strong>를 영어로 적으세요.</span>
+    </div>
+    <!-- 참고용 핵심 문장 예시 -->
+    <div style="margin-bottom:10px">
+      <div style="font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:6px;letter-spacing:.5px">💡 이번 주 핵심 문장 참고</div>
+      <div id="draft-ref-sentences" style="display:flex;flex-direction:column;gap:5px"></div>
+    </div>
+    <textarea class="dta" id="dta-step1" rows="3"
+      placeholder="e.g. You can't connect the dots looking forward; you can only connect them looking backward."
+      oninput="checkStep1()"></textarea>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <span id="step1-counter" style="font-size:11px;color:var(--tx3)">0자 입력됨</span>
+      <button class="btn-next" id="step1-next" onclick="goStep(2)" disabled>
+        다음 단계 <i class="ti ti-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 2: 선택 이유 -->
+  <div class="card" id="draft-step2" style="display:none">
+    <div class="ct"><i class="ti ti-message-2"></i>
+      <span>Step 2 · 선택 이유 작성</span>
+      <span class="step-badge">2 / 3</span>
+    </div>
+    <div class="info-box"><i class="ti ti-bulb"></i>
+      <span>왜 그 문장을 선택했는지 <strong>영어로</strong> 이유를 적으세요. (2~4문장 권장)</span>
+    </div>
+    <!-- 선택한 문장 표시 -->
+    <div id="step2-quote" style="background:var(--gd-bg);border-left:3px solid var(--gd);border-radius:0 var(--r8) var(--r8) 0;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--gd-tx);font-style:italic;line-height:1.6"></div>
+    <textarea class="dta" id="dta-step2" rows="4"
+      placeholder="e.g. I chose this sentence because it reminds me that every experience has meaning, even when we cannot see it at the time. As a future military officer, I believe that..."
+      oninput="checkStep2()"></textarea>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <span id="step2-counter" style="font-size:11px;color:var(--tx3)">0자 입력됨</span>
+      <div style="display:flex;gap:7px">
+        <button class="breset" onclick="goStep(1)"><i class="ti ti-arrow-left"></i> 이전</button>
+        <button class="btn-next" id="step2-next" onclick="goStep(3)" disabled>
+          다음 단계 <i class="ti ti-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: 나만의 스피치 -->
+  <div class="card" id="draft-step3" style="display:none">
+    <div class="ct"><i class="ti ti-edit"></i>
+      <span>Step 3 · 나만의 1분 스피치</span>
+      <span class="step-badge">3 / 3</span>
+    </div>
+    <div class="info-box"><i class="ti ti-bulb"></i>
+      <span>Step 1·2를 바탕으로 <strong>나만의 1분 스피치</strong>를 영어로 작성하세요. (약 120~150단어)</span>
+    </div>
+    <!-- Step 1, 2 요약 참고 -->
+    <div id="step3-summary" style="background:var(--bg3);border:0.5px solid var(--bd);border-radius:var(--r8);padding:10px 12px;margin-bottom:10px;font-size:11px;color:var(--tx2);line-height:1.7"></div>
+
+    <!-- 루브릭 체크 칩 -->
     <div class="dchips">
-      <span class="dchip" id="dc-summ">요약 미확인</span>
-      <span class="dchip" id="dc-intro">서론 미확인</span>
-      <span class="dchip" id="dc-body">본론 미확인</span>
-      <span class="dchip" id="dc-concl">결론 미확인</span>
-      <span class="dchip" id="dc-gram">문법 미확인</span>
-      <span class="dchip" id="dc-len">길이 미확인</span>
+      <span class="dchip" id="dc-w">필수단어 0/5</span>
+      <span class="dchip" id="dc-p">핵심표현 0/3</span>
+      <span class="dchip" id="dc-len">단어수 0/120</span>
+      <span class="dchip" id="dc-ref">인용문 미포함</span>
     </div>
 
-    <!-- Part 1: 낭독문 요약 -->
-    <div class="draft-section">
-      <div class="draft-section-label"><span class="ds-num">1</span>낭독문 요약 <span class="ds-hint">핵심 메시지 3~5문장 + 인상 깊은 문장 1~2개 인용</span></div>
-      <textarea class="dta" id="dta-summ" rows="3" placeholder="이 연설의 핵심 메시지는 ___입니다. 특히 '___'라는 문장이 인상 깊었습니다." oninput="liveChk()"></textarea>
-    </div>
-
-    <!-- Part 2: 나의 스피치 -->
-    <div class="draft-section">
-      <div class="draft-section-label"><span class="ds-num">2</span>나의 스피치 <span class="ds-hint">낭독문 주제와 연결해 서론·본론·결론으로 120~150단어</span></div>
-      <textarea class="dta" id="dta" rows="7" placeholder="[서론] 주의를 끄는 도입부로 시작하세요.&#10;&#10;[본론] 낭독문과 연결된 나의 경험이나 생각을 2~3가지 논점으로 전개하세요.&#10;&#10;[결론] 핵심 메시지를 강조하며 마무리하세요." oninput="liveChk()"></textarea>
-    </div>
-
+    <textarea class="dta" id="dta" rows="8"
+      placeholder="Start your speech here... (e.g. Good morning. Today I want to share with you a sentence that deeply moved me from Steve Jobs' commencement address...)"
+      oninput="liveChk()"></textarea>
     <div id="dai-box" class="dai ok" style="display:none"></div>
     <div class="dact">
+      <button class="breset" onclick="goStep(2)" style="background:var(--bg2);border:0.5px solid var(--bd);color:var(--tx)"><i class="ti ti-arrow-left"></i> 이전</button>
       <button class="bai" onclick="runAi()"><i class="ti ti-robot"></i> AI 루브릭 검사</button>
       <button class="bsub" id="dsub" onclick="submitDraft()" disabled><i class="ti ti-send"></i> 드래프트 제출</button>
     </div>
   </div>
+
+  <!-- 제출 완료 -->
+  <div id="draft-submitted" style="display:none">
+    <div class="card">
+      <div style="text-align:center;padding:20px 0">
+        <i class="ti ti-circle-check" style="font-size:48px;color:var(--gn-tx);display:block;margin-bottom:12px"></i>
+        <div style="font-size:16px;font-weight:700;color:var(--tx);margin-bottom:6px">드래프트 제출 완료!</div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.7;margin-bottom:16px">3단계 드래프트가 저장되었습니다.<br>최종 제출 탭으로 이동하여 스피치를 녹음하세요.</div>
+        <button class="btn-next" onclick="go('final')" style="margin:0 auto">
+          <i class="ti ti-microphone"></i> 최종 녹음하러 가기
+        </button>
+      </div>
+    </div>
+    <!-- 작성 내용 요약 -->
+    <div class="card" id="draft-summary-card">
+      <div class="ct"><i class="ti ti-file-text"></i> 제출된 드래프트 요약</div>
+      <div id="draft-final-summary" style="font-size:12px;color:var(--tx2);line-height:1.8"></div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ===== FINAL ===== -->
 <div id="sc-final" class="sc">
   <div class="card">
     <div class="ct"><i class="ti ti-microphone"></i>최종 스피치 녹음 및 AI 즉시 평가</div>
-
-    <!-- 안내 박스 -->
-    <div style="background:var(--bl-bg);border:0.5px solid var(--bl);border-radius:var(--r12);padding:14px 16px;margin-bottom:12px">
-      <div style="font-size:13px;font-weight:700;color:var(--bl-tx);margin-bottom:8px;display:flex;align-items:center;gap:6px">
-        <i class="ti ti-speakerphone"></i> 최종 녹음 안내
-      </div>
-      <div style="font-size:12px;color:var(--bl-tx);line-height:1.8">
-        ① 드래프트에서 작성한 스피치를 충분히 연습하고 <strong>암기</strong>한 뒤 녹음하세요.<br>
-        ② 목표 시간은 <strong>1분~1분 30초 이내</strong>입니다.<br>
-        ③ 녹음 전 조용한 장소를 찾아 마이크에 가까이 말하세요.<br>
-        ④ 미리 듣기로 확인 후 만족스러우면 제출하세요.
-      </div>
-    </div>
-
-    <!-- 루브릭 안내 -->
-    <div style="background:var(--bg3);border:0.5px solid var(--bd);border-radius:var(--r12);padding:12px 16px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px;display:flex;align-items:center;gap:6px">
-        <i class="ti ti-clipboard-list"></i> AI 채점 기준 (28점 만점)
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-        <div style="font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--bl);flex-shrink:0"></span>발음 정확성 (4점)</div>
-        <div style="font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--bl);flex-shrink:0"></span>유창성 (4점)</div>
-        <div style="font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--bl);flex-shrink:0"></span>구조 — 서론·본론·결론 (4점)</div>
-        <div style="font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--bl);flex-shrink:0"></span>주제 명확성 (4점)</div>
-        <div style="font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--bl);flex-shrink:0"></span>어휘 활용 (4점)</div>
-        <div style="font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--bl);flex-shrink:0"></span>전달력 · 표현력 (4점)</div>
-        <div style="font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:5px;grid-column:1/-1"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--or);flex-shrink:0"></span>시간 준수 — 목표 1분~1분 30초 (4점)</div>
-      </div>
-      <div style="font-size:11px;color:var(--tx3);margin-top:8px;padding-top:8px;border-top:0.5px solid var(--bd)">
-        ※ AI 채점은 참고용이며, 교수자가 정성 평가를 추가해 최종 점수를 확정합니다.
-      </div>
-    </div>
+    <div class="info-box"><i class="ti ti-info-circle"></i><span><strong>1~2분간 끊김 없이 녹음</strong>하세요. 제출 즉시 AI가 자동 채점합니다.</span></div>
     <div id="rec-area-wrap" class="rec-area">
       <div class="rec-status" id="rec-status">버튼을 눌러 녹음을 시작하세요</div>
       <div class="rec-timer" id="rec-timer">0:00</div>
@@ -632,83 +672,165 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 <!-- ============================================================ -->
 <script>
 // ==================== DEFAULT DATA ====================
+// ★ 매주 업데이트: Claude에 자료 전달 → 새 파일 받기 → GitHub 교체
 const DEFAULT_DATA={
   weeks:[
-    {id:'w4',label:'4주차 · Churchill 됭케르크'},
-    {id:'w3',label:'3주차 · Churchill 취임'},
-    {id:'w2',label:'2주차 · McRaven'},
-    {id:'w1',label:'1주차 · King'},
+    {id:'w1a',label:'1회차 · Jobs — Connecting the Dots'},
+    {id:'w1b',label:'2회차 · Jobs — Love & Loss · Death'},
   ],
-  cadets:[], // [{name,scores:{w3:28,w4:null,...}}]
+  cadets:[],
   content:{
-    w4:{
-      title:'됭케르크 · We Shall Fight on the Beaches',
+
+    // ============================================================
+    // 1회차: 1-1 + 1-2  Connecting the Dots
+    // ============================================================
+    w1a:{
+      title:'Steve Jobs — Connecting the Dots (1-1, 1-2)',
       words:[
-        {w:'evacuation',m:'대피, 철수',ex:'The evacuation of 338,000 soldiers was a miracle.'},
-        {w:'surrender',m:'항복하다, 포기하다',ex:'We shall never surrender to tyranny.'},
-        {w:'menace',m:'위협, 위험',ex:'We will outlive the menace of tyranny.'},
-        {w:'tyranny',m:'폭정, 독재',ex:'Churchill defied the tyranny of Nazi Germany.'},
-        {w:'confidence',m:'확신, 자신감',ex:'I have full confidence that we shall prevail.'},
-        {w:'subjugate',m:'정복하다, 굴복시키다',ex:'They attempted to subjugate the entire continent.'},
-        {w:'liberation',m:'해방',ex:'The liberation of Europe was the ultimate goal.'},
-        {w:'struggle',m:'투쟁, 싸움',ex:'We shall carry on the struggle until victory.'},
-        {w:'apparatus',m:'기구, 장치 (체제)',ex:'The odious apparatus of Nazi rule collapsed.'},
-        {w:'outlive',m:'~보다 오래 살다',ex:'We shall outlive the menace of tyranny.'},
-        {w:'fleet',m:'함대',ex:'The British Fleet guarded the seas.'},
-        {w:'retreat',m:'후퇴, 철수',ex:'The retreat from Dunkirk became a symbol of resilience.'},
-        {w:'encircle',m:'포위하다',ex:'The enemy attempted to encircle our forces.'},
-        {w:'harbour',m:'항구',ex:'The harbour was full of small civilian boats.'},
-        {w:'embark',m:'승선하다, 탑승하다',ex:'Soldiers began to embark on civilian vessels.'},
+        {w:'be honored',              m:'영광이다',                     ex:'I am honored to be with you today at your commencement.'},
+        {w:'commencement',            m:'졸업식',                       ex:'Today I want to tell you stories from my life at this commencement.'},
+        {w:'drop out',                m:'중퇴하다',                     ex:'She decided to drop out and start her own business.'},
+        {w:'drop in',                 m:'청강하다, 잠깐 들르다',        ex:'She likes to drop in on different clubs to find her interest.'},
+        {w:'quit',                    m:'그만두다, 떠나다',              ex:'After 6 months I really quit because I couldn\'t see the value in it.'},
+        {w:'connect the dots',        m:'점들을 연결하다',              ex:'By connecting the dots, he understood how his actions affected his friends.'},
+        {w:'see the value in',        m:'~의 가치를 보다',              ex:'I couldn\'t see the value in it, but then I found it fascinating.'},
+        {w:'at that time',            m:'그 당시에',                    ex:'Reed College at that time offered the best calligraphy instruction.'},
+        {w:'take the normal classes', m:'정규 수업을 듣다',             ex:'Because I dropped out, I didn\'t have to take the normal classes.'},
+        {w:'find something fascinating',m:'~을 매력적으로 발견하다',   ex:'I decided to take a calligraphy class and found it fascinating.'},
+        {w:'look forward',            m:'앞을 내다보다',                ex:'You can\'t connect the dots looking forward.'},
+        {w:'look backward',           m:'뒤를 돌아보다',                ex:'It was very clear looking backward 10 years later.'},
+        {w:'trust in something',      m:'~을 믿다',                    ex:'You have to trust in something — your gut, destiny, life, karma.'},
+        {w:'gut',                     m:'직감, 배짱',                   ex:'Trust your gut even when the path ahead seems unclear.'},
+        {w:'destiny',                 m:'운명',                         ex:'He believed in destiny and followed the path his heart chose.'},
+        {w:'somehow',                 m:'어떻게든, 왠지',               ex:'They somehow already know what you truly want to become.'},
+        {w:'have never let me down',  m:'나를 실망시킨 적이 없다',     ex:'This approach has never let me down, and it has made all the difference.'},
+        {w:'make all the difference', m:'큰 차이를 만들다',             ex:'Paying attention to small details will make all the difference.'},
+        {w:'be in college',           m:'대학에 재학 중이다',           ex:'When I was in college, it was impossible to connect the dots looking forward.'},
+        {w:'one of the finest universities',m:'최고의 대학 중 하나',   ex:'Reed College was one of the finest universities in the world.'},
       ],
       patterns:[
-        {blank:'We shall fight on the beaches, we shall fight on the _____ grounds.',a:'landing',full:'We shall fight on the beaches, we shall fight on the landing grounds.',hint:'명사 · 상륙'},
-        {blank:'Even though large tracts of Europe have fallen, we shall not _____ or fail.',a:'flag',full:'Even though large tracts of Europe have fallen, we shall not flag or fail.',hint:'동사 · 약해지다'},
-        {blank:'We shall go on to the _____, whatever the cost may be.',a:'end',full:'We shall go on to the end, whatever the cost may be.',hint:'명사 · 끝'},
-        {blank:'We shall fight with growing confidence and growing _____ in the air.',a:'strength',full:'We shall fight with growing confidence and growing strength in the air.',hint:'명사 · 힘'},
-        {blank:'We shall _____ surrender.',a:'never',full:'We shall never surrender.',hint:'부사 · 절대'},
-        {blank:'I have, myself, full _____ that if all do their duty, we shall prove ourselves.',a:'confidence',full:'I have, myself, full confidence that if all do their duty, we shall prove ourselves.',hint:'명사 · 확신'},
+        {blank:'I am _____ to be with you today at your commencement.',
+         a:'honored',full:'I am honored to be with you today at your commencement.',
+         hint:'형용사 · 영광스러운'},
+        {blank:'Reed College at _____ time offered perhaps the best calligraphy instruction in the country.',
+         a:'that',full:'Reed College at that time offered perhaps the best calligraphy instruction in the country.',
+         hint:'지시형용사 · 그'},
+        {blank:'Because I had dropped out, I didn\'t have to take the _____ classes.',
+         a:'normal',full:'Because I had dropped out, I didn\'t have to take the normal classes.',
+         hint:'형용사 · 정규'},
+        {blank:'I decided to take a calligraphy class to learn how to do this. It was beautiful and I found it _____.',
+         a:'fascinating',full:'I decided to take a calligraphy class to learn how to do this. It was beautiful and I found it fascinating.',
+         hint:'형용사 · 매력적인'},
+        {blank:'You can\'t connect the dots looking _____; you can only connect them looking backward.',
+         a:'forward',full:'You can\'t connect the dots looking forward; you can only connect them looking backward.',
+         hint:'부사 · 앞을'},
+        {blank:'You have to _____ that the dots will somehow connect in your future.',
+         a:'trust',full:'You have to trust that the dots will somehow connect in your future.',
+         hint:'동사 · 믿다'},
+        {blank:'You have to trust in something — your _____, destiny, life, karma, whatever.',
+         a:'gut',full:'You have to trust in something — your gut, destiny, life, karma, whatever.',
+         hint:'명사 · 직감'},
+        {blank:'This approach has never _____ me down, and it has made all the difference in my life.',
+         a:'let',full:'This approach has never let me down, and it has made all the difference in my life.',
+         hint:'동사 · 실망시키다'},
       ],
       shadows:[
-        {en:'We shall fight on the beaches, we shall fight on the landing grounds.',ko:'우리는 해변에서 싸울 것이며, 상륙지에서 싸울 것입니다.',tip:'shall에 강세 — 결의를 담아 또렷하게 발음하세요.'},
-        {en:'We shall fight in the fields and in the streets, we shall fight in the hills.',ko:'우리는 들판에서, 거리에서, 언덕에서 싸울 것입니다.',tip:'반복 구조에서 매번 동일한 강세 패턴을 유지하세요.'},
-        {en:'We shall never surrender.',ko:'우리는 절대 항복하지 않을 것입니다.',tip:'never를 길게 늘여 강조 — 결의의 클라이맥스입니다.'},
-        {en:'We shall go on to the end, whatever the cost may be.',ko:'어떤 대가가 있더라도 우리는 끝까지 나아갈 것입니다.',tip:'whatever the cost — 양보절을 조금 낮게 처리한 후 end를 다시 올리세요.'},
-        {en:'Even though large tracts of Europe have fallen, we shall not flag or fail.',ko:'유럽의 광대한 영토가 함락되었을지라도, 우리는 약해지거나 실패하지 않을 것입니다.',tip:'Even though 절은 빠르게, 주절(we shall not flag)을 천천히 강조하세요.'},
+        {en:'I am honored to be with you today at your commencement.',
+         ko:'오늘 여러분의 졸업식에 함께할 수 있어 영광입니다.',
+         tip:'honored를 진심 담아 천천히 — 첫 문장이 청중의 마음을 엽니다.'},
+        {en:'Reed College at that time offered perhaps the best calligraphy instruction in the country.',
+         ko:'리드 칼리지는 당시 아마도 나라에서 가장 훌륭한 서예 수업을 제공했습니다.',
+         tip:'perhaps를 부드럽게 — 확신보다 회상하는 톤으로.'},
+        {en:'You can\'t connect the dots looking forward; you can only connect them looking backward.',
+         ko:'앞을 내다보며 점들을 연결할 수는 없습니다. 뒤를 돌아볼 때만 연결할 수 있습니다.',
+         tip:'forward와 backward를 대비시켜 강조 — 두 단어를 다른 강세로 읽으세요.'},
+        {en:'You have to trust that the dots will somehow connect in your future.',
+         ko:'점들이 어떻게든 미래에 연결될 것이라고 믿어야 합니다.',
+         tip:'somehow를 부드럽게, trust를 확신있게 — 격려의 톤.'},
+        {en:'This approach has never let me down, and it has made all the difference in my life.',
+         ko:'이 방식은 저를 한 번도 실망시킨 적이 없으며, 제 삶에서 큰 차이를 만들어냈습니다.',
+         tip:'never를 강조하고 all the difference에서 목소리를 높이세요.'},
       ],
-      keywords:['fight','surrender','tyranny','evacuation','liberation','confidence','struggle','fleet','menace','outlive'],
-      patternKW:['we shall fight','never surrender','go on to the end','not flag or fail','full confidence'],
+      keywords:['honored','commencement','drop out','connect the dots','trust','forward','backward','fascinating','destiny','gut','value','calligraphy','normal','somehow','difference'],
+      patternKW:['connect the dots','you have to trust','never let me down','make all the difference','looking forward','looking backward'],
     },
-    w3:{
-      title:'Churchill 취임 연설',
+
+    // ============================================================
+    // 2회차: 1-3 + 1-4  Love & Loss · Death
+    // ============================================================
+    w1b:{
+      title:'Steve Jobs — Love & Loss · Death (1-3, 1-4)',
       words:[
-        {w:'perseverance',m:'인내, 끈기',ex:'Victory belongs to those who demonstrate perseverance.'},
-        {w:'adversity',m:'역경, 고난',ex:'Great leaders are forged in the fires of adversity.'},
-        {w:'valor',m:'용맹, 용기',ex:'Acts of valor define the character of a soldier.'},
-        {w:'fortitude',m:'불굴의 정신',ex:'Fortitude in crisis separates leaders from followers.'},
-        {w:'sovereignty',m:'주권, 통치권',ex:'A nation must defend its sovereignty at all costs.'},
-        {w:'mobilize',m:'동원하다',ex:'We must mobilize every resource available to us.'},
-        {w:'tenacity',m:'끈질김, 집요함',ex:'Her tenacity in the face of defeat inspired all.'},
-        {w:'unwavering',m:'흔들리지 않는',ex:'An unwavering commitment to duty defines the officer.'},
-        {w:'defiance',m:'저항, 반항',ex:'We stood in defiance against overwhelming odds.'},
-        {w:'resilience',m:'회복력',ex:'Resilience is the hallmark of true leadership.'},
+        // 1-3 Love & Loss
+        {w:'get fired',              m:'해고되다',                      ex:'He got fired from his job because he was always late.'},
+        {w:'turn out',               m:'결국 ~이 되다, 판명되다',       ex:'It turned out that getting fired was the best thing that happened to me.'},
+        {w:'release',                m:'출시하다, 발표하다',             ex:'Apple released our finest creation — the Macintosh.'},
+        {w:'in one\'s parents\' garage',m:'부모님 차고에서',            ex:'We started Apple in my parents\' garage when I was 20.'},
+        {w:'work hard',              m:'열심히 일하다',                  ex:'We worked hard and grew Apple from just two people to 4,000 employees.'},
+        {w:'be convinced',           m:'확신하다',                      ex:'I\'m convinced that the only thing that kept me going was my love for the work.'},
+        {w:'lose faith',             m:'믿음을 잃다',                   ex:'Don\'t lose faith even when life hits you in the head with a brick.'},
+        {w:'with a brick',           m:'벽돌로 (세게)',                  ex:'Sometimes life hits you in the head with a brick.'},
+        {w:'fill a large part of',   m:'~의 큰 부분을 채우다',          ex:'Your work is going to fill a large part of your life.'},
+        {w:'be truly satisfied',     m:'진정으로 만족하다',              ex:'The only way to be truly satisfied is to do what you believe is great work.'},
+        // 1-4 Death
+        {w:'be diagnosed with',      m:'~을 진단받다',                  ex:'About a year ago, I was diagnosed with cancer.'},
+        {w:'have a scan',            m:'검사를 받다',                   ex:'I had a scan at 7:30 in the morning.'},
+        {w:'a tumor on one\'s pancreas',m:'췌장의 종양',               ex:'The scan showed a tumor on my pancreas.'},
+        {w:'face death',             m:'죽음을 직면하다',               ex:'No one wants to die, but death is the destination we all share.'},
+        {w:'time is limited',        m:'시간은 유한하다',               ex:'Your time is limited, so don\'t waste it living someone else\'s life.'},
+        {w:'be trapped by dogma',    m:'도그마에 갇히다',               ex:'Don\'t be trapped by dogma — which is living with the results of other people\'s thinking.'},
+        {w:'drown out',              m:'(소리를) 묻히게 하다',          ex:'Don\'t let the noise of others\' opinions drown out your own inner voice.'},
+        {w:'follow one\'s heart and intuition',m:'마음과 직관을 따르다',ex:'Have the courage to follow your heart and intuition.'},
+        {w:'secondary',              m:'부차적인, 덜 중요한',           ex:'Everything else is secondary.'},
+        {w:'keep someone going',     m:'~가 계속 나아가게 하다',        ex:'Her encouragement kept me going even when I felt like giving up.'},
       ],
       patterns:[
-        {blank:'We shall _____ on the beaches, we shall fight on the landing grounds.',a:'fight',full:'We shall fight on the beaches, we shall fight on the landing grounds.',hint:'동사 · 싸우다'},
-        {blank:'I have nothing to offer but blood, _____, tears, and sweat.',a:'toil',full:'I have nothing to offer but blood, toil, tears, and sweat.',hint:'명사 · 노고'},
-        {blank:'Victory at all _____ — victory in spite of all terror.',a:'costs',full:'Victory at all costs — victory in spite of all terror.',hint:'명사 복수 · 대가'},
-        {blank:'You ask, what is our _____? I can answer in one word: victory.',a:'aim',full:'You ask, what is our aim? I can answer in one word: victory.',hint:'명사 · 목표'},
-        {blank:'We shall never _____ and we shall never be enslaved.',a:'surrender',full:'We shall never surrender and we shall never be enslaved.',hint:'동사 · 항복하다'},
+        {blank:'I didn\'t see it then, but it _____ that getting fired from Apple was the best thing.',
+         a:'turned out',full:'I didn\'t see it then, but it turned out that getting fired from Apple was the best thing.',
+         hint:'구동사 · 결국 ~임이 밝혀지다'},
+        {blank:'I\'m _____ that the only thing that kept me going was that I loved what I did.',
+         a:'convinced',full:'I\'m convinced that the only thing that kept me going was that I loved what I did.',
+         hint:'형용사 · 확신하는'},
+        {blank:'Your work is going to _____ a large part of your life.',
+         a:'fill',full:'Your work is going to fill a large part of your life.',
+         hint:'동사 · 채우다'},
+        {blank:'The only way to be truly satisfied is to do what you _____ is great work.',
+         a:'believe',full:'The only way to be truly satisfied is to do what you believe is great work.',
+         hint:'동사 · 믿다'},
+        {blank:'Your time is _____, so don\'t waste it living someone else\'s life.',
+         a:'limited',full:'Your time is limited, so don\'t waste it living someone else\'s life.',
+         hint:'형용사 · 유한한'},
+        {blank:'Don\'t be _____ by dogma — which is living with the results of other people\'s thinking.',
+         a:'trapped',full:'Don\'t be trapped by dogma — which is living with the results of other people\'s thinking.',
+         hint:'동사(수동) · 갇히다'},
+        {blank:'Don\'t let the noise of others\' opinions _____ your own inner voice.',
+         a:'drown out',full:'Don\'t let the noise of others\' opinions drown out your own inner voice.',
+         hint:'구동사 · 묻히게 하다'},
+        {blank:'Have the courage to follow your heart and _____.',
+         a:'intuition',full:'Have the courage to follow your heart and intuition.',
+         hint:'명사 · 직관'},
       ],
       shadows:[
-        {en:'I have nothing to offer but blood, toil, tears, and sweat.',ko:'저는 피와 노고와 눈물과 땀 외에는 드릴 것이 없습니다.',tip:'단어를 또렷하게 끊어 읽되 문장 리듬을 살리세요.'},
-        {en:'You ask, what is our aim? I can answer in one word: victory.',ko:'여러분은 우리의 목표가 무엇이냐 묻습니다. 한 단어로 답하면: 승리입니다.',tip:'victory를 짧고 강하게 — 마침표처럼 끊으세요.'},
-        {en:'We shall never surrender.',ko:'우리는 절대 항복하지 않을 것입니다.',tip:'never를 길게, surrender를 천천히.'},
+        {en:'I didn\'t see it then, but it turned out that getting fired from Apple was the best thing that could have ever happened to me.',
+         ko:'그때는 몰랐지만, 결국 Apple에서 해고된 것이 내게 일어날 수 있었던 최고의 일임이 밝혀졌습니다.',
+         tip:'turned out을 강조 — 반전의 핵심 단어입니다. 천천히 또렷하게.'},
+        {en:'Your work is going to fill a large part of your life, and the only way to be truly satisfied is to do what you believe is great work.',
+         ko:'여러분의 일은 삶의 큰 부분을 차지할 것입니다. 진정으로 만족하는 유일한 방법은 위대한 일이라고 믿는 것을 하는 것입니다.',
+         tip:'fill과 satisfied에 강세 — 핵심 메시지를 전달하세요.'},
+        {en:'Your time is limited, so don\'t waste it living someone else\'s life.',
+         ko:'여러분의 시간은 유한합니다. 그러니 다른 사람의 삶을 사느라 낭비하지 마세요.',
+         tip:'limited 후 잠깐 쉬고 don\'t waste it을 강하게 — 명령의 느낌으로.'},
+        {en:'Don\'t let the noise of others\' opinions drown out your own inner voice.',
+         ko:'다른 사람들의 의견 소음이 여러분 자신의 내면의 목소리를 묻히게 하지 마세요.',
+         tip:'drown out을 실제로 목소리를 낮추듯 — 극적 효과를 주세요.'},
+        {en:'Have the courage to follow your heart and intuition. Everything else is secondary.',
+         ko:'마음과 직관을 따를 용기를 가지세요. 그 외 모든 것은 부차적입니다.',
+         tip:'secondary를 단호하게, 짧게 끊어 — 결론의 무게감을 주세요.'},
       ],
-      keywords:['blood','toil','tears','sweat','fight','victory','perseverance','adversity','courage','defiance'],
-      patternKW:['we shall','nothing to offer','in spite of','at all costs','you ask'],
+      keywords:['fired','turned out','limited','trapped','dogma','drown out','intuition','secondary','satisfied','convinced','faith','fill','release','diagnosed','scan'],
+      patternKW:['turned out','fill a large part','time is limited','trapped by dogma','drown out','follow your heart','keep me going'],
     },
-    w2:{title:'McRaven 졸업식 연설',words:[{w:'discipline',m:'규율, 훈련',ex:'Discipline bridges goals and accomplishment.'},{w:'integrity',m:'청렴, 진실성',ex:'Integrity means doing right when no one watches.'},{w:'courage',m:'용기',ex:'Courage is the triumph over fear.'},{w:'humility',m:'겸손',ex:'Humility lets leaders learn from mistakes.'},{w:'accountability',m:'책임감',ex:'Accountability is the foundation of trust.'},{w:'relentless',m:'끈질긴, 가차없는',ex:'Relentless effort is the key to success.'},{w:'adversity',m:'역경',ex:'Adversity reveals character.'},{w:'endurance',m:'인내력, 지구력',ex:'Endurance is the mark of a warrior.'},{w:'compassion',m:'연민',ex:'Great leaders show compassion to those in need.'},{w:'resilience',m:'회복력',ex:'Resilience is built through hardship.'}],patterns:[{blank:'If you want to _____ the world, start by making your bed.',a:'change',full:'If you want to change the world, start by making your bed.',hint:'동사 · 변화시키다'},{blank:'Never ring the _____ — never give up.',a:'bell',full:'Never ring the bell — never give up.',hint:'명사 · 종'}],shadows:[{en:'If you want to change the world, start by making your bed.',ko:'세상을 변화시키고 싶다면, 침대 정리부터 시작하세요.',tip:'조건절을 가볍게, 핵심 명령문을 강조하세요.'},{en:'Never ring the bell — never give up.',ko:'절대 종을 울리지 마세요 — 절대 포기하지 마세요.',tip:'두 번의 never에 동등한 강세를 두세요.'}],keywords:['discipline','integrity','courage','humility','accountability','relentless','adversity','endurance','compassion','resilience'],patternKW:['if you want','never ring','change the world']},
-    w1:{title:'Martin Luther King "I Have a Dream"',words:[{w:'justice',m:'정의',ex:'We will not be satisfied until justice rolls down like waters.'},{w:'freedom',m:'자유',ex:'Free at last, we are free at last.'},{w:'equality',m:'평등',ex:'All men are created equal.'},{w:'dream',m:'꿈, 이상',ex:'I have a dream that one day this nation will rise up.'},{w:'oppression',m:'억압',ex:'We cannot walk alone as long as oppression exists.'},{w:'brotherhood',m:'형제애',ex:'Brotherhood transcends race and class.'},{w:'destiny',m:'운명',ex:'We are bound by a common destiny.'},{w:'righteous',m:'정당한, 올바른',ex:'We will not rest until righteous judgment prevails.'},{w:'beacon',m:'횃불, 등대',ex:'America must serve as a beacon of hope.'},{w:'redemption',m:'구원, 속죄',ex:'The arc of the moral universe bends toward redemption.'}],patterns:[{blank:'I have a _____ that one day this nation will rise up.',a:'dream',full:'I have a dream that one day this nation will rise up.',hint:'명사 · 꿈'},{blank:'We will not be satisfied until _____ rolls down like waters.',a:'justice',full:'We will not be satisfied until justice rolls down like waters.',hint:'명사 · 정의'}],shadows:[{en:'I have a dream that one day this nation will rise up.',ko:'나는 언젠가 이 나라가 일어설 것이라는 꿈이 있습니다.',tip:'dream에 감정을 실어 천천히 강조하세요.'},{en:'We will not be satisfied until justice rolls down like waters.',ko:'정의가 물처럼 흘러내릴 때까지 우리는 만족하지 않을 것입니다.',tip:'until 이하 절을 점층적으로 강조하세요.'}],keywords:['justice','freedom','equality','dream','oppression','brotherhood','destiny','righteous','beacon','redemption'],patternKW:['i have a dream','free at last','we will not','cannot walk']},
+
   }
 };
 
@@ -782,7 +904,7 @@ function loadWeek(wid){
   document.getElementById('pv-s').textContent='미완료';
   document.getElementById('pv-f').textContent='미제출';
   ['ps-v','ps-p','ps-s','ps-f'].forEach(id=>document.getElementById(id).classList.remove('done'));
-  renderCard();renderPats();renderShadow();go('vocab');
+  renderCard();renderPats();renderShadow();initDraft();go('vocab');
 }
 
 function changeWeek(wid){
@@ -872,359 +994,255 @@ function toggleSRec(i){
 function wordOverlap(got,ref){const gw=got.replace(/[^a-z\s]/g,'').split(/\s+/).filter(Boolean);const rw=ref.replace(/[^a-z\s]/g,'').split(/\s+/).filter(Boolean);if(!rw.length)return 0;return Math.round(rw.filter(w=>gw.includes(w)).length/rw.length*100);}
 function markShadowDone(){showToast('섀도잉 완료!');go('final');}
 
-// ==================== DRAFT ====================
+// ==================== DRAFT (3단계) ====================
+let draftStep=1;
 
-function liveChk(){
-  var summ=document.getElementById('dta-summ')?document.getElementById('dta-summ').value.trim():'';
-  var t=document.getElementById('dta').value;
-  var words=t.trim()?t.trim().split(/\s+/).filter(Boolean).length:0;
-  var lenOk=words>=100&&words<=200;
-  // 요약 칩
-  var summChip=document.getElementById('dc-summ');
-  if(summChip){
-    var summOk=summ.length>20;
-    summChip.className='dchip '+(summOk?'ok':'');
-    summChip.textContent=summOk?'요약 ✓':'요약 미작성';
-  }
-  // 길이 칩
-  var lenChip=document.getElementById('dc-len');
-  var labels={'dc-intro':'서론 미확인','dc-body':'본론 미확인','dc-concl':'결론 미확인','dc-gram':'문법 미확인'};
-  if(!t.trim()&&!summ){
-    Object.keys(labels).forEach(function(id){var el=document.getElementById(id);if(el){el.className='dchip';el.textContent=labels[id];}});
-    if(lenChip){lenChip.className='dchip';lenChip.textContent='길이 미확인';}
-    document.getElementById('dsub').disabled=true;
-    return;
-  }
-  if(lenChip){
-    lenChip.className='dchip '+(lenOk?'ok':'ng');
-    lenChip.textContent='길이 '+words+'단어'+(lenOk?' ✓':(words<100?' (짧음)':' (너무 김)'));
-  }
-  document.getElementById('dsub').disabled=!(summ.length>10);
+function initDraft(){
+  // 참고 문장 렌더 (섀도잉 문장 재활용)
+  const el=document.getElementById('draft-ref-sentences');
+  if(!el)return;
+  el.innerHTML='';
+  const shadows=DATA.content[currentWeek]?.shadows||[];
+  shadows.slice(0,4).forEach(s=>{
+    const d=document.createElement('div');
+    d.className='ref-sentence';
+    d.innerHTML=`<i class="ti ti-quote"></i><span>${s.en}</span>`;
+    d.onclick=()=>{
+      document.getElementById('dta-step1').value=s.en;
+      checkStep1();
+      showToast('문장이 입력되었습니다');
+    };
+    el.appendChild(d);
+  });
+  // 단계 초기화
+  goStep(1,true);
 }
 
-async function runAi(){
-  var txt=document.getElementById('dta').value.trim();
-  if(!txt){showToast('먼저 드래프트를 작성하세요.');return;}
-  var btn=document.querySelector('.bai');
-  btn.disabled=true;
-  btn.innerHTML='<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> AI 분석 중...';
-  var box=document.getElementById('dai-box');
-  box.style.display='block';box.className='dai ok';
-  box.innerHTML='<span style="display:flex;align-items:center;gap:6px"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> AI가 스피치 구조를 분석하고 있습니다...</span>';
-  var chipIds=['dc-intro','dc-body','dc-concl','dc-topic','dc-gram','dc-len'];
-  var chipLabels={'dc-intro':'서론 미확인','dc-body':'본론 미확인','dc-concl':'결론 미확인',
-    'dc-topic':'주제 미확인','dc-gram':'문법 미확인','dc-len':'길이 미확인'};
-  chipIds.forEach(function(id){var el=document.getElementById(id);el.className='dchip';el.textContent='분석 중...';});
-  var words=txt.split(/\s+/).filter(Boolean).length;
-  var summText=document.getElementById('dta-summ')?document.getElementById('dta-summ').value.trim():'';
-  var sampleJson='{"summary":{"score":0,"label":"낭독문 요약","ok":false,"feedback":""},"intro":{"score":0,"label":"서론","ok":false,"feedback":""},"body":{"score":0,"label":"본론","ok":false,"feedback":""},"conclusion":{"score":0,"label":"결론","ok":false,"feedback":""},"grammar":{"score":0,"label":"문법","ok":false,"feedback":""},"length":{"score":0,"label":"길이","ok":false,"feedback":""},"total":0,"overall":""}';
-  var promptText='You are a KMA English speech coach. A cadet wrote a 2-part draft: a summary of a famous speech they studied, then their own speech.\n'
-    +'Evaluate the ENTIRE draft on 6 criteria. Respond ONLY in valid JSON (no markdown):\n'
-    +sampleJson+'\n\n'
-    +'Scoring criteria:\n'
-    +'- summary (0-2): Does Part 1 clearly capture the key message of the studied speech and include at least one quoted sentence? ok=true if score>=1\n'
-    +'- intro (0-2): Does the cadet speech (Part 2) have a clear opening hook? ok=true if score>=1\n'
-    +'- body (0-4): Are there 2-3 logical supporting points connected to the studied speech theme? ok=true if score>=2\n'
-    +'- conclusion (0-2): Is there a clear closing that reinforces the message? ok=true if score>=1\n'
-    +'- grammar (0-4): Overall grammar accuracy across both parts. 4=no errors, 3=minor, 2=several, 1=many, 0=severe. ok=true if score>=2\n'
-    +'- length (0-4): Speech part word count is '+words+'. Ideal 120-150w. 4=120-150, 3=100-170, 2=80-100or170-200, 1=<80or>200. ok=true if score>=3\n'
-    +'- total: sum (max 16)\n'
-    +'- feedback: 1-2 sentences in Korean per criterion\n'
-    +'- overall: 2-3 sentence Korean summary with specific advice for memorization\n\n'
-    +(summText?'Part 1 - Summary:\n"""\n'+summText+'\n"""\n\n':'')
-    +'Part 2 - Cadet Speech:\n"""\n'+txt+'\n"""';
-  try{
-    var res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
-        messages:[{role:'user',content:promptText}]})
-    });
-    var data=await res.json();
-    var raw=data.content.map(function(b){return b.text||'';}).join('').replace(/```json|```/g,'').trim();
-    var r=JSON.parse(raw);
-    var chipMap={'dc-summ':r.summary,'dc-intro':r.intro,'dc-body':r.body,
-      'dc-concl':r.conclusion,'dc-gram':r.grammar,'dc-len':r.length};
-    Object.entries(chipMap).forEach(function(entry){
-      var id=entry[0];var item=entry[1];
-      var el=document.getElementById(id);
-      el.className='dchip '+(item.ok?'ok':'ng');
-      el.textContent=item.label+' '+(item.ok?'✓':'✗');
-    });
-    var total=r.total;var pct=Math.round(total/20*100);
-    var grade=pct>=90?'우수':pct>=75?'양호':pct>=60?'보통':'보완 필요';  // /16 기준
-    var gc=pct>=90?'var(--gn-tx)':pct>=75?'var(--bl-tx)':pct>=60?'var(--or-tx)':'var(--rd-tx)';
-    var sColor=function(s,m){var p=Math.round(s/m*100);return p>=80?'#639922':p>=60?'#BA7517':'#A32D2D';};
-    var bPct=function(s,m){return Math.round(s/m*100);};
-    var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:0.5px solid #B5D4F4">'
-      +'<span style="font-size:13px;font-weight:700">AI 루브릭 검사 결과</span>'
-      +'<span style="font-size:20px;font-weight:700;font-family:\'Playfair Display\',serif;color:'+gc+'">'
-      +total+'<span style="font-size:11px;font-weight:400;color:var(--tx3)">/16</span>'
-      +'<span style="font-size:11px;font-weight:700;margin-left:5px;color:'+gc+'">'+grade+'</span></span></div>';
-    var items=[r.summary,r.intro,r.body,r.conclusion,r.grammar,r.length];
-    var maxes=[2,2,4,2,4,4];
-    items.forEach(function(item,i){
-      var bc=sColor(item.score,maxes[i]);var bp=bPct(item.score,maxes[i]);
-      html+='<div style="margin-bottom:8px">'
-        +'<div style="display:flex;justify-content:space-between;margin-bottom:3px">'
-        +'<span style="font-size:12px;font-weight:500">'+item.label+'</span>'
-        +'<span style="font-size:11px;font-weight:500;color:'+bc+'">'+item.score+'/'+maxes[i]+'</span></div>'
-        +'<div style="background:var(--bg);border-radius:20px;height:5px;overflow:hidden;margin-bottom:4px">'
-        +'<div style="height:100%;width:'+bp+'%;background:'+bc+';border-radius:20px;transition:width .5s"></div></div>'
-        +'<div style="font-size:11px;color:var(--tx2);line-height:1.5">'+item.feedback+'</div></div>';
-    });
-    html+='<div style="background:var(--bg3);border-radius:var(--r8);padding:8px 12px;margin-top:6px;font-size:12px;'
-      +'color:var(--tx2);line-height:1.7;border:0.5px solid var(--bd)"><strong>총평:</strong> '+r.overall+'</div>';
-    box.className='dai ok';box.innerHTML=html;
-    document.getElementById('dsub').disabled=false;
-    showToast('AI 분석 완료! '+total+'/16점');
-  }catch(e){
-    box.className='dai err';
-    box.innerHTML='<i class="ti ti-alert-circle"></i> AI 분석 중 오류가 발생했습니다. 다시 시도해 주세요.';
-    chipIds.forEach(function(id){var el=document.getElementById(id);el.className='dchip';el.textContent=chipLabels[id];});
-    showToast('오류 발생. 다시 시도하세요.');
+function goStep(n, silent){
+  draftStep=n;
+  document.getElementById('draft-step1').style.display=n===1?'block':'none';
+  document.getElementById('draft-step2').style.display=n===2?'block':'none';
+  document.getElementById('draft-step3').style.display=n===3?'block':'none';
+  document.getElementById('draft-submitted').style.display='none';
+
+  if(n===2){
+    // Step1 선택 문장을 Step2에 표시
+    const q=document.getElementById('dta-step1').value.trim();
+    document.getElementById('step2-quote').innerHTML=`<i class="ti ti-quote" style="font-size:14px;margin-right:5px"></i>${q}`;
+    checkStep2();
   }
-  btn.disabled=false;
-  btn.innerHTML='<i class="ti ti-robot"></i> AI 루브릭 검사';
+  if(n===3){
+    // Step1+2 요약 표시
+    const q=document.getElementById('dta-step1').value.trim();
+    const r=document.getElementById('dta-step2').value.trim();
+    document.getElementById('step3-summary').innerHTML=
+      `<strong>📌 선택한 문장:</strong><br><em style="color:var(--gd-tx)">"${q}"</em><br><br>`+
+      `<strong>💬 선택 이유:</strong><br>${r}`;
+    liveChk();
+  }
+  if(!silent) window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function checkStep1(){
+  const v=document.getElementById('dta-step1').value.trim();
+  document.getElementById('step1-counter').textContent=v.length+'자 입력됨';
+  document.getElementById('step1-next').disabled=v.length<10;
+}
+
+function checkStep2(){
+  const v=document.getElementById('dta-step2').value.trim();
+  const wc=v.split(/\s+/).filter(Boolean).length;
+  document.getElementById('step2-counter').textContent=wc+'단어 입력됨';
+  document.getElementById('step2-next').disabled=wc<15;
+}
+
+function setChip(id,t,ok){const e=document.getElementById(id);if(!e)return;e.textContent=t;e.className='dchip'+(ok?' ok':' ng');}
+
+function liveChk(){
+  const c=DATA.content[currentWeek]||{};
+  const KW=c.keywords||[];
+  const PKW=c.patternKW||[];
+  const t=document.getElementById('dta').value;
+  const tl=t.toLowerCase();
+  const wc=KW.filter(k=>tl.includes(k)).length;
+  const pc=PKW.filter(k=>tl.includes(k)).length;
+  const wordCount=t.trim().split(/\s+/).filter(Boolean).length;
+  // 인용문 포함 여부: Step1 문장 일부가 포함됐는지
+  const q1=document.getElementById('dta-step1')?.value.trim()||'';
+  const refIncluded=q1.length>5&&tl.includes(q1.toLowerCase().substring(0,20));
+  setChip('dc-w','필수단어 '+wc+'/5',wc>=5);
+  setChip('dc-p','핵심표현 '+pc+'/3',pc>=3);
+  setChip('dc-len','단어수 '+wordCount+'/120',wordCount>=120);
+  setChip('dc-ref',refIncluded?'인용문 포함 ✓':'인용문 미포함',refIncluded);
+  draftOk=(wc>=5&&pc>=3&&wordCount>=120);
+  document.getElementById('dsub').disabled=!draftOk;
+}
+
+function runAi(){
+  const t=document.getElementById('dta').value.trim();
+  const box=document.getElementById('dai-box');
+  const wordCount=t.split(/\s+/).filter(Boolean).length;
+  if(wordCount<50){
+    box.style.display='block';box.className='dai err';
+    box.innerHTML='<i class="ti ti-alert-circle"></i> 최소 50단어 이상 작성 후 검사하세요. (목표: 120단어)';
+    return;
+  }
+  liveChk();
+  const c=DATA.content[currentWeek]||{};
+  const KW=c.keywords||[];const PKW=c.patternKW||[];
+  const tl=t.toLowerCase();
+  const wc=KW.filter(k=>tl.includes(k)).length;
+  const pc=PKW.filter(k=>tl.includes(k)).length;
+  const q1=document.getElementById('dta-step1')?.value.trim()||'';
+  const refIncluded=q1.length>5&&tl.includes(q1.toLowerCase().substring(0,20));
+  const ok=(s)=>s?'<span style="color:#27500A;font-weight:500">✓ 충족</span>':'<span style="color:#791F1F;font-weight:500">✗ 미충족</span>';
+  box.style.display='block';
+  box.className=draftOk?'dai ok':'dai err';
+  box.innerHTML=`
+    <strong>AI 루브릭 검사 결과</strong> <span style="font-size:11px;color:inherit;font-weight:400">(${wordCount}단어)</span><br><br>
+    필수단어 활용 (5개 이상): ${ok(wc>=5)} — ${wc}개 포함<br>
+    핵심표현 활용 (3개 이상): ${ok(pc>=3)} — ${pc}개 포함<br>
+    스피치 분량 (120단어 이상): ${ok(wordCount>=120)} — ${wordCount}단어<br>
+    Step 1 인용문 포함: ${ok(refIncluded)}<br><br>
+    ${draftOk
+      ? '<strong style="color:#27500A">✓ 모든 조건 충족! 드래프트 제출 가능합니다.</strong>'
+      : '<strong style="color:#791F1F">미충족 항목을 보완 후 재검사하세요.</strong>'}`;
 }
 
 function submitDraft(){
-  draftOk=true;
-  showToast('드래프트가 저장되었습니다. 최종 녹음으로 이동합니다.');
-  setTimeout(function(){go('final');},900);
+  // 제출 화면 전환
+  document.getElementById('draft-step3').style.display='none';
+  document.getElementById('draft-submitted').style.display='block';
+  // 요약 카드 구성
+  const q1=document.getElementById('dta-step1').value.trim();
+  const q2=document.getElementById('dta-step2').value.trim();
+  const q3=document.getElementById('dta').value.trim();
+  const wc=q3.split(/\s+/).filter(Boolean).length;
+  document.getElementById('draft-final-summary').innerHTML=`
+    <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:0.5px solid var(--bd)">
+      <div style="font-size:10px;font-weight:700;color:var(--tx3);margin-bottom:4px">STEP 1 · 선택한 핵심 문장</div>
+      <div style="font-style:italic;color:var(--gd-tx)">"${q1}"</div>
+    </div>
+    <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:0.5px solid var(--bd)">
+      <div style="font-size:10px;font-weight:700;color:var(--tx3);margin-bottom:4px">STEP 2 · 선택 이유</div>
+      <div>${q2}</div>
+    </div>
+    <div>
+      <div style="font-size:10px;font-weight:700;color:var(--tx3);margin-bottom:4px">STEP 3 · 나만의 스피치 (${wc}단어)</div>
+      <div style="white-space:pre-wrap">${q3}</div>
+    </div>`;
+function submitDraft(){
+  // 제출 화면 전환
+  document.getElementById('draft-step3').style.display='none';
+  document.getElementById('draft-submitted').style.display='block';
+  // 요약 카드 구성
+  const q1=document.getElementById('dta-step1').value.trim();
+  const q2=document.getElementById('dta-step2').value.trim();
+  const q3=document.getElementById('dta').value.trim();
+  const wc=q3.split(/\s+/).filter(Boolean).length;
+  document.getElementById('draft-final-summary').innerHTML=`
+    <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:0.5px solid var(--bd)">
+      <div style="font-size:10px;font-weight:700;color:var(--tx3);margin-bottom:4px">STEP 1 · 선택한 핵심 문장</div>
+      <div style="font-style:italic;color:var(--gd-tx)">"${q1}"</div>
+    </div>
+    <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:0.5px solid var(--bd)">
+      <div style="font-size:10px;font-weight:700;color:var(--tx3);margin-bottom:4px">STEP 2 · 선택 이유</div>
+      <div>${q2}</div>
+    </div>
+    <div>
+      <div style="font-size:10px;font-weight:700;color:var(--tx3);margin-bottom:4px">STEP 3 · 나만의 스피치 (${wc}단어)</div>
+      <div style="white-space:pre-wrap">${q3}</div>
+    </div>`;
+  // 드래프트 진도 완료 표시
+  document.getElementById('ps-f').classList.remove('done');
+  showToast('드래프트 제출 완료! 이제 최종 녹음을 진행하세요');
 }
 
 // ==================== FINAL REC ====================
-let mediaRecorder=null, audioChunks=[], audioBlob=null, audioUrl=null, audioPlayer=null;
-let recStream=null;
-
-async function toggleRec(){
-  if(submitted)return;
-  if(recOn){ stopRecording(); return; }
-  await startRecording();
+function toggleRec(){
+  if(submitted)return;recOn=!recOn;
+  const btn=document.getElementById('rec-main'),bars=document.querySelectorAll('.rbar');
+  if(recOn){btn.classList.add('recording');document.getElementById('rec-ico').className='ti ti-player-stop';document.getElementById('rec-status').textContent='녹음 중 — 준비된 스크립트를 보며 말하세요';document.getElementById('rec-status').style.color='var(--rd)';document.getElementById('rec-timer').classList.add('on');document.getElementById('rec-actions').style.display='none';document.getElementById('rec-preview').style.display='none';recTick=setInterval(()=>{recSec++;const m=Math.floor(recSec/60),s=recSec%60;document.getElementById('rec-timer').textContent=m+':'+(s<10?'0':'')+s;bars.forEach(b=>{b.classList.add('on');b.style.height=(5+Math.floor(Math.random()*18))+'px';});},1000);}
+  else{clearInterval(recTick);btn.classList.remove('recording');document.getElementById('rec-ico').className='ti ti-microphone';document.getElementById('rec-status').textContent='녹음 완료 — 미리 듣고 제출하세요';document.getElementById('rec-status').style.color='';document.getElementById('rec-timer').classList.remove('on');bars.forEach(b=>{b.classList.remove('on');b.style.height='8px';});hasRec=true;const m=Math.floor(recSec/60),s=recSec%60;document.getElementById('rec-dur').textContent='길이: '+m+'분 '+s+'초';document.getElementById('rec-preview').style.display='block';document.getElementById('rec-actions').style.display='flex';}
 }
+function playPrev(){const ico=document.getElementById('pp-ico'),lbl=document.getElementById('pp-lbl'),pg=document.getElementById('play-prog');if(playInt){clearInterval(playInt);playInt=null;ico.className='ti ti-player-play';lbl.textContent='미리 듣기';pg.style.width='0%';return;}ico.className='ti ti-player-stop';lbl.textContent='중지';let p=0;playInt=setInterval(()=>{p+=2;pg.style.width=p+'%';if(p>=100){clearInterval(playInt);playInt=null;ico.className='ti ti-player-play';lbl.textContent='미리 듣기';}},60);}
+function resetRec(){clearInterval(recTick);clearInterval(playInt);playInt=null;recOn=false;recSec=0;hasRec=false;document.getElementById('rec-main').classList.remove('recording');document.getElementById('rec-ico').className='ti ti-microphone';document.getElementById('rec-timer').textContent='0:00';document.getElementById('rec-timer').classList.remove('on');document.getElementById('rec-status').textContent='버튼을 눌러 녹음을 시작하세요';document.getElementById('rec-status').style.color='';document.getElementById('rec-preview').style.display='none';document.getElementById('rec-actions').style.display='none';document.getElementById('play-prog').style.width='0%';document.querySelectorAll('.rbar').forEach(b=>{b.classList.remove('on');b.style.height='8px';});}
+function submitFinal(){submitted=true;document.getElementById('rec-area-wrap').style.display='none';showRubric();document.getElementById('rubric-result').style.display='block';document.getElementById('ps-f').classList.add('done');document.getElementById('pv-f').textContent='제출완료';showToast('AI 채점 완료!');}
 
-async function startRecording(){
-  try{
-    recStream=await navigator.mediaDevices.getUserMedia({audio:true});
-  }catch(err){
-    showToast('마이크 권한이 필요합니다. 브라우저 설정에서 허용해주세요.');
-    document.getElementById('rec-status').textContent='⚠️ 마이크 권한을 허용해주세요';
-    return;
-  }
-  audioChunks=[];
-  // iOS Safari 호환: mime type 자동 선택
-  const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus'
-    : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm'
-    : MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
-  mediaRecorder = mimeType ? new MediaRecorder(recStream,{mimeType}) : new MediaRecorder(recStream);
-  mediaRecorder.ondataavailable=e=>{ if(e.data&&e.data.size>0) audioChunks.push(e.data); };
-  mediaRecorder.onstop=()=>{
-    audioBlob=new Blob(audioChunks,{type: mediaRecorder.mimeType||'audio/webm'});
-    if(audioUrl) URL.revokeObjectURL(audioUrl);
-    audioUrl=URL.createObjectURL(audioBlob);
-    if(audioPlayer) audioPlayer.pause();
-    audioPlayer=new Audio(audioUrl);
-    audioPlayer.ontimeupdate=()=>{
-      if(audioPlayer.duration){
-        const pct=(audioPlayer.currentTime/audioPlayer.duration)*100;
-        document.getElementById('play-prog').style.width=pct+'%';
-      }
-    };
-    audioPlayer.onended=()=>{
-      document.getElementById('pp-ico').className='ti ti-player-play';
-      document.getElementById('pp-lbl').textContent='미리 듣기';
-      document.getElementById('play-prog').style.width='0%';
-    };
-    // 녹음 완료 UI
-    const m=Math.floor(recSec/60),s=recSec%60;
-    document.getElementById('rec-dur').textContent='길이: '+m+'분 '+s+'초';
-    document.getElementById('rec-preview').style.display='block';
-    document.getElementById('rec-actions').style.display='flex';
-    document.getElementById('rec-status').textContent='녹음 완료 — 미리 듣고 제출하세요';
-    document.getElementById('rec-status').style.color='';
-    document.getElementById('rec-timer').classList.remove('on');
-    document.querySelectorAll('.rbar').forEach(b=>{b.classList.remove('on');b.style.height='8px';});
-    hasRec=true;
-    // 스트림 종료
-    if(recStream){ recStream.getTracks().forEach(t=>t.stop()); recStream=null; }
+const RUBRIC_ITEMS=[
+  {label:'발음 정확성', key:'pron', max:4, fb:'발음이 전반적으로 명확합니다. 연음 처리에 추가 연습을 권합니다.'},
+  {label:'유창성',      key:'flu',  max:4, fb:'말의 흐름이 양호합니다. 속도 조절과 강세에 더 주의를 기울이면 좋습니다.'},
+  {label:'구조 적합성', key:'str',  max:4, fb:'서론·본론·결론 구조가 갖춰져 있습니다. 본론 근거를 보강하면 이상적입니다.'},
+  {label:'주제 명확성', key:'theme',max:4, fb:'핵심 메시지가 일관되게 전달되었습니다.'},
+  {label:'어휘·패턴',   key:'vocab',max:4, fb:'필수단어와 핵심표현을 활용했습니다. 더 다양한 어휘를 시도해보세요.'},
+  {label:'인용문 활용', key:'quote',max:4, fb:'연설 핵심 문장을 자신의 스피치에 적절히 인용했습니다.'},
+  {label:'시간 준수',   key:'time', max:4, fb:'목표 시간(1분) 범위 내에서 발표를 완료했습니다.'},
+];
+
+function showRubric(){
+  // 드래프트 내용 기반 동적 채점
+  const draft=document.getElementById('dta')?.value||'';
+  const step1=document.getElementById('dta-step1')?.value||'';
+  const step2=document.getElementById('dta-step2')?.value||'';
+  const dl=draft.toLowerCase();
+  const wordCount=draft.trim().split(/\s+/).filter(Boolean).length;
+
+  const c=DATA.content[currentWeek]||{};
+  const KW=c.keywords||[];
+  const PKW=c.patternKW||[];
+  const kwHits=KW.filter(k=>dl.includes(k)).length;
+  const pkHits=PKW.filter(k=>dl.includes(k)).length;
+  const hasQuote=step1.length>10&&dl.includes(step1.toLowerCase().substring(0,15));
+  const hasReason=step2.trim().split(/\s+/).filter(Boolean).length>=15;
+
+  // 각 항목 0~4점 채점
+  const sc={
+    pron: 3, // 실제 음성 분석 불가 → 섀도잉 평균 유사도 참고
+    flu:  recSec>=55&&recSec<=90 ? 4 : recSec>=40 ? 3 : 2,
+    str:  (draft.includes('First')||draft.includes('To begin')||draft.includes('In conclusion')||draft.includes('Finally')) ? 4 : hasReason ? 3 : 2,
+    theme: kwHits>=8 ? 4 : kwHits>=5 ? 3 : kwHits>=3 ? 2 : 1,
+    vocab: (kwHits>=8&&pkHits>=4) ? 4 : (kwHits>=5&&pkHits>=3) ? 3 : kwHits>=3 ? 2 : 1,
+    quote: hasQuote ? 4 : step1.length>10 ? 3 : 2,
+    time:  wordCount>=120&&wordCount<=180 ? 4 : wordCount>=100 ? 3 : wordCount>=70 ? 2 : 1,
   };
-  mediaRecorder.start(100);
-  recOn=true;
-  recSec=0;
-  const btn=document.getElementById('rec-main');
-  btn.classList.add('recording');
-  document.getElementById('rec-ico').className='ti ti-player-stop';
-  document.getElementById('rec-status').textContent='녹음 중 — 스피치를 말하세요';
-  document.getElementById('rec-status').style.color='var(--rd)';
-  document.getElementById('rec-timer').classList.add('on');
-  document.getElementById('rec-actions').style.display='none';
-  document.getElementById('rec-preview').style.display='none';
-  const bars=document.querySelectorAll('.rbar');
-  recTick=setInterval(()=>{
-    recSec++;
-    const m=Math.floor(recSec/60),s=recSec%60;
-    document.getElementById('rec-timer').textContent=m+':'+(s<10?'0':'')+s;
-    bars.forEach(b=>{b.classList.add('on');b.style.height=(4+Math.floor(Math.random()*20))+'px';});
-  },1000);
-}
 
-function stopRecording(){
-  clearInterval(recTick);
-  recOn=false;
-  document.getElementById('rec-main').classList.remove('recording');
-  document.getElementById('rec-ico').className='ti ti-microphone';
-  if(mediaRecorder&&mediaRecorder.state!=='inactive') mediaRecorder.stop();
-}
-
-function playPrev(){
-  if(!audioPlayer){ showToast('녹음 파일이 없습니다.'); return; }
-  const ico=document.getElementById('pp-ico'),lbl=document.getElementById('pp-lbl');
-  if(!audioPlayer.paused){
-    audioPlayer.pause();audioPlayer.currentTime=0;
-    ico.className='ti ti-player-play';lbl.textContent='미리 듣기';
-    document.getElementById('play-prog').style.width='0%';
-    return;
-  }
-  ico.className='ti ti-player-stop';lbl.textContent='중지';
-  audioPlayer.play().catch(()=>showToast('재생 오류가 발생했습니다.'));
-}
-
-function resetRec(){
-  clearInterval(recTick);
-  if(mediaRecorder&&mediaRecorder.state!=='inactive'){ mediaRecorder.stop(); }
-  if(recStream){ recStream.getTracks().forEach(t=>t.stop()); recStream=null; }
-  if(audioPlayer){ audioPlayer.pause(); audioPlayer=null; }
-  if(audioUrl){ URL.revokeObjectURL(audioUrl); audioUrl=null; }
-  audioBlob=null; audioChunks=[];
-  recOn=false; recSec=0; hasRec=false;
-  document.getElementById('rec-main').classList.remove('recording');
-  document.getElementById('rec-ico').className='ti ti-microphone';
-  document.getElementById('rec-timer').textContent='0:00';
-  document.getElementById('rec-timer').classList.remove('on');
-  document.getElementById('rec-status').textContent='버튼을 눌러 녹음을 시작하세요';
-  document.getElementById('rec-status').style.color='';
-  document.getElementById('rec-preview').style.display='none';
-  document.getElementById('rec-actions').style.display='none';
-  document.getElementById('play-prog').style.width='0%';
-  document.querySelectorAll('.rbar').forEach(b=>{b.classList.remove('on');b.style.height='8px';});
-}
-
-async function submitFinal(){
-  if(!hasRec){ showToast('먼저 녹음해주세요.'); return; }
-  submitted=true;
-  document.getElementById('final-sub').disabled=true;
-  document.getElementById('final-sub').innerHTML='<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> AI 채점 중...';
-
-  // Web Speech API로 음성 → 텍스트 변환 시도
-  let transcript='';
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(SR && audioPlayer){
-    try{
-      transcript = await new Promise((resolve)=>{
-        const r=new SR();
-        r.lang='en-US'; r.continuous=true; r.interimResults=false; r.maxAlternatives=1;
-        let parts=[];
-        r.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)parts.push(e.results[i][0].transcript);}};
-        r.onerror=()=>resolve(parts.join(' '));
-        r.onend=()=>resolve(parts.join(' '));
-        r.start();
-        // 녹음 길이만큼 대기 후 종료
-        setTimeout(()=>{ try{r.stop();}catch(e){} resolve(parts.join(' ')); }, Math.min(recSec*1000+2000, 125000));
-      });
-    }catch(e){ transcript=''; }
+  // 섀도잉 평균으로 발음 점수 보정
+  const doneAcc=shdwAcc.filter((_,i)=>shdwDone[i]);
+  if(doneAcc.length){
+    const avg=doneAcc.reduce((a,b)=>a+b,0)/doneAcc.length;
+    sc.pron=avg>=90?4:avg>=75?3:avg>=60?2:1;
   }
 
-  await runFinalAi(transcript, recSec);
-}
+  const total=Object.values(sc).reduce((a,b)=>a+b,0);
+  const grade=total>=26?'A':total>=20?'B':total>=14?'C':'D';
+  const gc=total>=26?'#27500A':total>=20?'#185FA5':total>=14?'#BA7517':'#A32D2D';
+  const gb_=total>=26?'#EAF3DE':total>=20?'#E6F1FB':total>=14?'#FEF3C7':'#FCEBEB';
 
-async function runFinalAi(transcript, durationSec){
-  const draftText = document.getElementById('dta').value.trim();
-  const durationStr = Math.floor(durationSec/60)+'분 '+( durationSec%60)+'초';
-  const timeOk = durationSec>=60 && durationSec<=90;
-
-  const promptText = 'You are a KMA (Korean Military Academy) English speech evaluator.\n'
-    +'Evaluate a cadet\'s leadership speech. Respond ONLY in valid JSON, no markdown.\n\n'
-    +'Context:\n'
-    +'- Speech duration: '+durationStr+' (ideal: 1 min = 50~70 sec)\n'
-    +(transcript ? '- Transcribed speech (may have errors): """'+transcript+'"""\n' : '- Transcription unavailable\n')
-    +(draftText ? '- Written draft for reference: """'+draftText+'"""\n' : '')
-    +'\nJSON format:\n'
-    +'{"pronunciation":{"score":0,"label":"발음 정확성","max":4,"feedback":""},'
-    +'"fluency":{"score":0,"label":"유창성","max":4,"feedback":""},'
-    +'"structure":{"score":0,"label":"구조 (서론·본론·결론)","max":4,"feedback":""},'
-    +'"topic":{"score":0,"label":"주제 명확성","max":4,"feedback":""},'
-    +'"vocabulary":{"score":0,"label":"어휘 활용","max":4,"feedback":""},'
-    +'"expression":{"score":0,"label":"표현력","max":4,"feedback":""},'
-    +'"timing":{"score":0,"label":"시간 준수","max":4,"feedback":""},'
-    +'"total":0,"grade":"","overall":""}\n\n'
-    +'Scoring criteria:\n'
-    +'- pronunciation(0-4): clarity and accuracy of English pronunciation\n'
-    +'- fluency(0-4): smooth delivery without excessive hesitation\n'
-    +'- structure(0-4): clear intro/body/conclusion organization\n'
-    +'- topic(0-4): leadership theme clearly and consistently delivered\n'
-    +'- vocabulary(0-4): appropriate and varied word choice\n'
-    +'- expression(0-4): engaging delivery, emphasis, rhetorical devices\n'
-    +'- timing(0-4): ideal range is 60-90 seconds (1min~1min30sec). Duration is '+durationStr+'. 4=60-90s, 3=45-100s, 2=30-45s or 100-120s, 1=<30s or >120s. ok=true if score>=3\n'
-    +'- total: sum (max 28)\n'
-    +'- grade: "A"(>=25), "B"(>=20), "C"(>=14), "D"(<14)\n'
-    +'- feedback: 1-2 sentences each in Korean\n'
-    +'- overall: 2-3 sentence Korean summary\n'
-    +(transcript?'':'Note: transcription unavailable. Evaluate based on draft text and timing only. Be fair but note limitation.');
-
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,
-        messages:[{role:'user',content:promptText}]})
-    });
-    const data=await res.json();
-    const raw=data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
-    const r=JSON.parse(raw);
-    showRubricFromAi(r);
-  }catch(e){
-    // fallback: 하드코딩 대신 시간 기반 간단 채점
-    const timeScore = timeOk?4:durationSec>=40&&durationSec<=150?3:durationSec>0?2:1;
-    const fallback={
-      pronunciation:{score:3,label:'발음 정확성',max:4,feedback:'녹음이 제출되었습니다. 교수자 최종 평가를 기다리세요.'},
-      fluency:{score:3,label:'유창성',max:4,feedback:'교수자가 녹음을 확인 후 최종 점수를 확정합니다.'},
-      structure:{score:3,label:'구조 (서론·본론·결론)',max:4,feedback:'드래프트를 참고하여 평가됩니다.'},
-      topic:{score:3,label:'주제 명확성',max:4,feedback:'리더십 주제가 전달되었는지 교수자가 확인합니다.'},
-      vocabulary:{score:3,label:'어휘 활용',max:4,feedback:'작성된 드래프트의 어휘를 참고합니다.'},
-      expression:{score:3,label:'표현력',max:4,feedback:'교수자 정성 평가가 추가됩니다.'},
-      timing:{score:timeScore,label:'시간 준수',max:4,feedback:'녹음 시간: '+durationStr+'.'},
-      total:timeScore+18, grade:timeScore+18>=25?'A':timeScore+18>=20?'B':'C', overall:'녹음이 성공적으로 제출되었습니다. AI 분석에 일부 제한이 있어 교수자가 최종 점수를 확정합니다.'
-    };
-    showRubricFromAi(fallback);
-  }
-}
-
-function showRubricFromAi(r){
-  const total=r.total;
-  const gc=total>=25?'#27500A':total>=20?'#185FA5':total>=14?'#BA7517':'#A32D2D';
-  const gb_=total>=25?'#EAF3DE':total>=20?'#E6F1FB':total>=14?'#FEF3C7':'#FCEBEB';
   document.getElementById('r-total').innerHTML=total+'<span>/28점</span>';
   const gb=document.getElementById('r-grade');
-  gb.textContent='등급 '+r.grade; gb.style.background=gb_; gb.style.color=gc;
-  const rows=document.getElementById('rubric-rows'); rows.innerHTML='';
-  const keys=['pronunciation','fluency','structure','topic','vocabulary','expression','timing'];
-  keys.forEach(k=>{
-    const item=r[k]; if(!item)return;
-    const pct=Math.round(item.score/item.max*100);
+  gb.textContent='등급 '+grade;gb.style.background=gb_;gb.style.color=gc;
+
+  const rows=document.getElementById('rubric-rows');rows.innerHTML='';
+  RUBRIC_ITEMS.forEach(item=>{
+    const s=sc[item.key];
+    const pct=Math.round(s/item.max*100);
     const col=pct>=90?'#639922':pct>=75?'#BA7517':'#185FA5';
-    const row=document.createElement('div'); row.className='rubric-row';
-    row.innerHTML='<div class="rubric-label">'+item.label+'</div>'
-      +'<div class="rubric-bar-wrap"><div class="rubric-bar-bg"><div class="rubric-bar-fill" style="width:'+pct+'%;background:'+col+'"></div></div>'
-      +'<div class="rubric-fb">'+item.feedback+'</div></div>'
-      +'<div class="rubric-score" style="color:'+col+'">'+item.score+'/'+item.max+'</div>';
+    const row=document.createElement('div');row.className='rubric-row';
+    row.innerHTML=`<div class="rubric-label">${item.label}</div>
+      <div class="rubric-bar-wrap">
+        <div class="rubric-bar-bg"><div class="rubric-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+        <div class="rubric-fb">${item.fb}</div>
+      </div>
+      <div class="rubric-score" style="color:${col}">${s}/${item.max}</div>`;
     rows.appendChild(row);
   });
-  document.getElementById('overall-fb').innerHTML='<strong>종합 코멘트</strong><br>'+r.overall;
-  document.getElementById('rec-area-wrap').style.display='none';
-  document.getElementById('rubric-result').style.display='block';
-  document.getElementById('ps-f').classList.add('done');
-  document.getElementById('pv-f').textContent='제출완료';
-  showToast('AI 채점 완료! '+total+'/28점');
-  // 점수 저장
+
+  const gradeMsg=grade==='A'?'탁월한 스피치입니다!':grade==='B'?'우수한 스피치입니다.':grade==='C'?'양호한 스피치입니다. 조금 더 다듬어보세요.':'추가 연습이 필요합니다.';
+  document.getElementById('overall-fb').innerHTML=
+    `<strong>종합 코멘트</strong><br>총점 ${total}/28점 (등급 ${grade}). ${gradeMsg}<br>`+
+    `어휘 활용 ${kwHits}개 · 핵심표현 ${pkHits}개 · 스피치 ${wordCount}단어. `+
+    `${hasQuote?'핵심 인용문을 잘 활용했습니다.':'Step 1의 인용문을 스피치에 포함하면 더 좋습니다.'}`;
+  // save score to both DATA and instEditData
   if(cadetName){
     if(!DATA.cadets)DATA.cadets=[];
     let cd=DATA.cadets.find(c=>c.name===cadetName);
@@ -1235,9 +1253,14 @@ function showRubricFromAi(r){
   }
 }
 
-
 // ==================== NAV ====================
-function go(id){document.querySelectorAll('.sc').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));document.getElementById('sc-'+id).classList.add('on');document.getElementById('nb-'+id).classList.add('on');}
+function go(id){
+  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('sc-'+id).classList.add('on');
+  document.getElementById('nb-'+id).classList.add('on');
+  if(id==='draft') initDraft();
+}
 function showToast(msg){const t=document.getElementById('toast');t.innerHTML='<i class="ti ti-check"></i> '+msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800);}
 
 // ==================== STUDENT IMPORT ====================
