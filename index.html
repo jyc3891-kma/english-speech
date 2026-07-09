@@ -262,14 +262,14 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 <div class="app">
 
 <!-- CADET NAME MODAL -->
-<div class="name-overlay" id="name-overlay">
+<div class="name-overlay" id="name-overlay" style="display:none">
   <div class="name-box">
     <div class="kma-b">KMA</div>
     <h2>영어발표와 연설</h2>
     <p>생도 이름을 입력하세요.<br>교수자 성적 관리에 자동으로 등록됩니다.</p>
     <input class="name-inp" id="name-inp" type="text" placeholder="홍길동" maxlength="10"
       onkeydown="if(event.key==='Enter')confirmName()">
-    <button class="name-btn" onclick="confirmName()"><i class="ti ti-arrow-right"></i> 시작하기</button>
+    <button type="button" class="name-btn" onclick="confirmName()"><i class="ti ti-arrow-right"></i> 시작하기</button>
     <div class="name-err" id="name-err">이름을 입력해주세요</div>
   </div>
 </div>
@@ -851,20 +851,36 @@ let cadetName='';
 function init(){
   const saved=localStorage.getItem('kma_data');
   if(saved){try{DATA=JSON.parse(saved);}catch(e){}}
+  buildWeekSel();
+  loadWeek(currentWeek);
+  // 이름 확인은 loadWeek 이후에 처리
   const sn=localStorage.getItem('kma_cadet_name');
-  if(sn){cadetName=sn;document.getElementById('cadet-name-disp').textContent=sn;document.getElementById('name-overlay').style.display='none';}
-  else{document.getElementById('name-overlay').style.display='flex';}
-  buildWeekSel();loadWeek(currentWeek);
+  if(sn){
+    cadetName=sn;
+    document.getElementById('cadet-name-disp').textContent=sn;
+    document.getElementById('name-overlay').style.display='none';
+  } else {
+    document.getElementById('name-overlay').style.display='flex';
+    setTimeout(()=>document.getElementById('name-inp').focus(), 300);
+  }
 }
 
 function confirmName(){
-  const v=document.getElementById('name-inp').value.trim();
-  if(!v){document.getElementById('name-err').style.display='block';return;}
+  const inp=document.getElementById('name-inp');
+  const err=document.getElementById('name-err');
+  const v=inp?inp.value.trim():'';
+  if(!v){
+    if(err)err.style.display='block';
+    if(inp)inp.focus();
+    return;
+  }
+  if(err)err.style.display='none';
   cadetName=v;
   localStorage.setItem('kma_cadet_name',v);
-  document.getElementById('cadet-name-disp').textContent=v;
-  document.getElementById('name-overlay').style.display='none';
-  // auto-register in cadets list
+  const disp=document.getElementById('cadet-name-disp');
+  if(disp)disp.textContent=v;
+  const overlay=document.getElementById('name-overlay');
+  if(overlay)overlay.style.display='none';
   autoRegisterCadet(v);
   showToast('환영합니다, '+v+' 생도!');
 }
