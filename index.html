@@ -305,13 +305,14 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
   <div class="pi" id="ps-f"><div class="pl">최종 제출</div><div class="pv" id="pv-f">미제출</div></div>
 </div>
 
-<!-- 자료 불러오기 -->
-<div class="stu-import-bar" id="stu-import-bar">
+<!-- 자료 불러오기 / 내 학습결과 제출 -->
+<div class="stu-import-bar" id="stu-import-bar" style="flex-wrap:wrap">
   <i class="ti ti-file-import"></i>
-  <span>교수자 배포 자료(.json)를 불러올 수 있습니다.</span>
-  <label class="stu-import-btn" style="cursor:pointer">자료 불러오기
+  <span style="flex:1;min-width:130px">교수자 자료(.json) 불러오기 · 학습을 마친 뒤 내 결과를 파일로 내보내 제출하세요.</span>
+  <label class="stu-import-btn" style="cursor:pointer;background:var(--nv2)">자료 불러오기
     <input type="file" accept=".json" style="display:none" onchange="importStudentData(event)">
   </label>
+  <button class="stu-import-btn" onclick="exportMyResults()"><i class="ti ti-file-export" style="font-size:12px"></i> 내 학습결과 제출 파일</button>
 </div>
 
 <!-- ===== VOCAB ===== -->
@@ -562,6 +563,9 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
           <div class="inst-section-t" style="margin:0"><i class="ti ti-users"></i> 생도 명단 및 주차별 성적</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
             <select id="grade-wk-sel" onchange="refreshGradeSummary()" style="border:0.5px solid var(--bd);border-radius:6px;padding:5px 9px;font-size:12px;background:var(--bg2);font-family:'Noto Sans KR',sans-serif;outline:none"></select>
+            <label class="inst-btn" style="cursor:pointer"><i class="ti ti-file-import"></i> 생도 성적 불러오기
+              <input type="file" accept=".json" multiple style="display:none" onchange="importCadetResults(event)">
+            </label>
             <button class="inst-btn" onclick="exportGradeCSV()"><i class="ti ti-file-spreadsheet"></i> CSV 내보내기</button>
           </div>
         </div>
@@ -583,7 +587,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
           </table>
         </div>
         <div style="font-size:11px;color:var(--tx3);margin-top:8px;line-height:1.6">
-          <i class="ti ti-info-circle" style="font-size:12px"></i> 점수 입력 후 <strong>저장 및 앱 반영</strong>을 누르세요. 생도가 앱에 이름을 입력하면 명단에 자동 등록됩니다.
+          <i class="ti ti-info-circle" style="font-size:12px"></i> 생도가 각자 기기에서 <strong>'내 학습결과 제출 파일'</strong>을 내보내 제출하면, 위 <strong>'생도 성적 불러오기'</strong>로 여러 명을 한 번에 병합할 수 있습니다(병합 시 자동 저장). 점수 직접 입력·수정도 가능합니다.
         </div>
       </div>
 
@@ -846,11 +850,15 @@ let instPw=localStorage.getItem('kma_inst_pw')||'kma2025';
 let instEditData=null;
 let parsedDocxData=null;
 let cadetName='';
+let progressStore={};   // 주차별 진행 상황 {wid:{...}}
+let isRestoring=false;  // 복원 중 저장 억제 플래그
 
 // ==================== CADET NAME ====================
 function init(){
   const saved=localStorage.getItem('kma_data');
   if(saved){try{DATA=JSON.parse(saved);}catch(e){}}
+  const sp=localStorage.getItem('kma_progress');
+  if(sp){try{progressStore=JSON.parse(sp)||{};}catch(e){progressStore={};}}
   buildWeekSel();
   loadWeek(currentWeek);
   // 이름 확인은 loadWeek 이후에 처리
@@ -903,6 +911,7 @@ function buildWeekSel(){
 }
 
 function loadWeek(wid){
+  isRestoring=true;
   currentWeek=wid;
   const c=DATA.content[wid]||{words:[],patterns:[],shadows:[],title:'',keywords:[],patternKW:[]};
   WORDS=c.words||[];PATS=c.patterns||[];SHADOWS=c.shadows||[];
@@ -911,21 +920,90 @@ function loadWeek(wid){
   shdwAcc=Array(SHADOWS.length).fill(0);
   shdwRec=Array(SHADOWS.length).fill(false);
   cardIdx=0;seenCount=0;flipped=false;draftOk=false;
-  recOn=false;recSec=0;hasRec=false;submitted=false;
+  recOn=false;recSec=0;hasRec=false;submitted=false;draftStep=1;
+  // 저장된 진행 상황 복원 (단어·패턴·섀도잉)
+  restoreProgress(wid);
   document.getElementById('vocab-title').textContent='어휘 플래시카드 · '+(c.title||wid)+' ('+WORDS.length+'단어)';
   document.getElementById('pattern-title').textContent='패턴 빈칸 드릴 · '+(c.title||wid);
   document.getElementById('shadow-title').textContent='섀도잉 · '+(c.title||wid);
+  document.getElementById('pv-v').textContent=(WORDS.length&&seenCount>=WORDS.length)?'완료':seenCount+'/'+WORDS.length;
   document.getElementById('pv-p').textContent='0/'+PATS.length;
-  document.getElementById('pv-v').textContent='0/'+WORDS.length;
   document.getElementById('pv-s').textContent='미완료';
   document.getElementById('pv-f').textContent='미제출';
   ['ps-v','ps-p','ps-s','ps-f'].forEach(id=>document.getElementById(id).classList.remove('done'));
-  renderCard();renderPats();renderShadow();initDraft();go('vocab');
+  if(WORDS.length&&seenCount>=WORDS.length)document.getElementById('ps-v').classList.add('done');
+  resetFinalUI();
+  renderCard();renderPats();if(PATS.length)updPat();renderShadow();initDraft();
+  restoreFinalUI(wid);
+  isRestoring=false;
+  go('vocab');
 }
 
 function changeWeek(wid){
-  if(confirm('주차를 변경하면 현재 진도가 초기화됩니다. 계속할까요?'))loadWeek(wid);
-  else document.getElementById('wk-sel').value=currentWeek;
+  saveProgress();     // 현재 주차 진행 상황을 먼저 저장
+  loadWeek(wid);      // 대상 주차의 저장된 진행 상황으로 복원
+}
+
+// ==================== 진행 상황 저장 / 복원 ====================
+function saveProgress(){
+  if(isRestoring||!currentWeek)return;
+  const g=id=>document.getElementById(id);
+  const subEl=g('draft-submitted');
+  progressStore[currentWeek]={
+    cardIdx:cardIdx,
+    seenCount:seenCount,
+    patDone:patDone.slice(),
+    shdwDone:shdwDone.slice(),
+    shdwAcc:shdwAcc.slice(),
+    draftStep:draftStep,
+    d1:g('dta-step1')?g('dta-step1').value:'',
+    d2:g('dta-step2')?g('dta-step2').value:'',
+    d3:g('dta')?g('dta').value:'',
+    draftSubmitted:subEl?subEl.style.display==='block':false,
+    finalDone:submitted,
+    recSec:recSec
+  };
+  try{localStorage.setItem('kma_progress',JSON.stringify(progressStore));}catch(e){}
+}
+
+function restoreProgress(wid){
+  const P=progressStore[wid];
+  if(!P)return;
+  if(Number.isInteger(P.cardIdx)&&P.cardIdx<WORDS.length)cardIdx=P.cardIdx;
+  if(Number.isInteger(P.seenCount))seenCount=Math.min(P.seenCount,WORDS.length);
+  if(Array.isArray(P.patDone)&&P.patDone.length===PATS.length)patDone=P.patDone.slice();
+  if(Array.isArray(P.shdwDone)&&P.shdwDone.length===SHADOWS.length)shdwDone=P.shdwDone.slice();
+  if(Array.isArray(P.shdwAcc)&&P.shdwAcc.length===SHADOWS.length)shdwAcc=P.shdwAcc.slice();
+  // recSec은 최종 제출 완료 시에만 restoreFinalUI에서 복원
+}
+
+// 최종 녹음 영역을 초기(미녹음) 상태로 되돌림
+function resetFinalUI(){
+  clearInterval(recTick);clearInterval(playInt);playInt=null;
+  const g=id=>document.getElementById(id);
+  if(g('rec-area-wrap'))g('rec-area-wrap').style.display='';
+  if(g('rubric-result'))g('rubric-result').style.display='none';
+  if(g('rec-main'))g('rec-main').classList.remove('recording');
+  if(g('rec-ico'))g('rec-ico').className='ti ti-microphone';
+  if(g('rec-timer')){g('rec-timer').textContent='0:00';g('rec-timer').classList.remove('on');}
+  if(g('rec-status')){g('rec-status').textContent='버튼을 눌러 녹음을 시작하세요';g('rec-status').style.color='';}
+  if(g('rec-preview'))g('rec-preview').style.display='none';
+  if(g('rec-actions'))g('rec-actions').style.display='none';
+  if(g('play-prog'))g('play-prog').style.width='0%';
+  document.querySelectorAll('.rbar').forEach(b=>{b.classList.remove('on');b.style.height='8px';});
+}
+
+// 최종 제출을 완료했던 주차면 채점 결과를 다시 표시
+function restoreFinalUI(wid){
+  const P=progressStore[wid]||{};
+  if(!P.finalDone)return;
+  submitted=true;
+  recSec=Number.isInteger(P.recSec)?P.recSec:0;
+  document.getElementById('rec-area-wrap').style.display='none';
+  showRubric();
+  document.getElementById('rubric-result').style.display='block';
+  document.getElementById('ps-f').classList.add('done');
+  document.getElementById('pv-f').textContent='제출완료';
 }
 
 // ==================== FLASHCARD ====================
@@ -945,7 +1023,7 @@ function renderCard(){
 }
 function speakWord(){const w=WORDS[cardIdx];if(!w)return;if('speechSynthesis' in window){window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(w.w);u.lang='en-US';u.rate=0.78;window.speechSynthesis.speak(u);}showToast('발음 재생: '+w.w);}
 function flipCard(){flipped=!flipped;document.getElementById('fc-front').style.display=flipped?'none':'block';document.getElementById('fc-back').style.display=flipped?'flex':'none';document.getElementById('fc-front-btns').style.display=flipped?'none':'flex';document.getElementById('fc-back-btns').style.display=flipped?'flex':'none';}
-function nextCard(){seenCount=Math.min(seenCount+1,WORDS.length);cardIdx=(cardIdx+1)%WORDS.length;renderCard();if(seenCount>=WORDS.length){document.getElementById('ps-v').classList.add('done');document.getElementById('pv-v').textContent='완료';}else{document.getElementById('pv-v').textContent=seenCount+'/'+WORDS.length;}}
+function nextCard(){seenCount=Math.min(seenCount+1,WORDS.length);cardIdx=(cardIdx+1)%WORDS.length;renderCard();saveProgress();if(seenCount>=WORDS.length){document.getElementById('ps-v').classList.add('done');document.getElementById('pv-v').textContent='완료';}else{document.getElementById('pv-v').textContent=seenCount+'/'+WORDS.length;}}
 
 // ==================== PATTERN ====================
 function renderPats(){
@@ -966,7 +1044,7 @@ function renderPats(){
   });
 }
 function speakPat(i){if('speechSynthesis' in window){window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(PATS[i].full);u.lang='en-US';u.rate=0.78;window.speechSynthesis.speak(u);}}
-function chkPat(i){const inp=document.getElementById('pb-'+i);const val=inp.value.trim().toLowerCase();if(val===PATS[i].a){inp.className='p-inp c';inp.readOnly=true;document.getElementById('pf-'+i).textContent='정답!';document.getElementById('pf-'+i).className='p-fb ok';document.getElementById('pi-'+i).classList.add('ok');document.getElementById('pb-btn-'+i).disabled=true;patDone[i]=true;showFullSentence(i,true);updPat();}else{inp.className='p-inp w';document.getElementById('pf-'+i).textContent='오답. 다시 시도하세요.';document.getElementById('pf-'+i).className='p-fb ng';setTimeout(()=>{inp.className='p-inp';},1200);showFullSentence(i,false);}}
+function chkPat(i){const inp=document.getElementById('pb-'+i);const val=inp.value.trim().toLowerCase();if(val===PATS[i].a){inp.className='p-inp c';inp.readOnly=true;document.getElementById('pf-'+i).textContent='정답!';document.getElementById('pf-'+i).className='p-fb ok';document.getElementById('pi-'+i).classList.add('ok');document.getElementById('pb-btn-'+i).disabled=true;patDone[i]=true;showFullSentence(i,true);updPat();saveProgress();}else{inp.className='p-inp w';document.getElementById('pf-'+i).textContent='오답. 다시 시도하세요.';document.getElementById('pf-'+i).className='p-fb ng';setTimeout(()=>{inp.className='p-inp';},1200);showFullSentence(i,false);}}
 function showFullSentence(i,ok){const box=document.getElementById('pf-full-'+i);const h=PATS[i].full.replace(PATS[i].a,'<span>'+PATS[i].a+'</span>');box.style.display='block';box.style.background=ok?'#EAF3DE':'#E6F1FB';box.style.color=ok?'#27500A':'#0C447C';box.innerHTML=(ok?'✓ 정답 문장: ':'정답 확인: ')+h;}
 function updPat(){const n=patDone.filter(Boolean).length;document.getElementById('pv-p').textContent=n+'/'+PATS.length;if(n>=PATS.length){document.getElementById('ps-p').classList.add('done');document.getElementById('pv-p').textContent='완료';}}
 
@@ -1002,10 +1080,10 @@ function toggleSRec(i){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   shdwRec[i]=true;renderShadow();
   if(SR){const r=new SR();window._sRec=r;r.lang='en-US';r.interimResults=false;
-    r.onresult=e=>{const t=e.results[0][0].transcript.toLowerCase();const ref=SHADOWS[i].en.toLowerCase();const sc=wordOverlap(t,ref);shdwAcc[i]=sc;shdwDone[i]=true;shdwRec[i]=false;renderShadow();showToast('유사도 '+sc+'%');};
-    r.onerror=()=>{const sc=62+Math.floor(Math.random()*30);shdwAcc[i]=sc;shdwDone[i]=true;shdwRec[i]=false;renderShadow();showToast('유사도 '+sc+'% (시뮬레이션)');};
+    r.onresult=e=>{const t=e.results[0][0].transcript.toLowerCase();const ref=SHADOWS[i].en.toLowerCase();const sc=wordOverlap(t,ref);shdwAcc[i]=sc;shdwDone[i]=true;shdwRec[i]=false;renderShadow();saveProgress();showToast('유사도 '+sc+'%');};
+    r.onerror=()=>{const sc=62+Math.floor(Math.random()*30);shdwAcc[i]=sc;shdwDone[i]=true;shdwRec[i]=false;renderShadow();saveProgress();showToast('유사도 '+sc+'% (시뮬레이션)');};
     r.onend=()=>{if(shdwRec[i]){shdwRec[i]=false;renderShadow();}};r.start();
-  }else{showToast('녹음 중... 3초 후 분석');setTimeout(()=>{const sc=62+Math.floor(Math.random()*34);shdwAcc[i]=sc;shdwDone[i]=true;shdwRec[i]=false;renderShadow();showToast('유사도 '+sc+'%');},3000);}
+  }else{showToast('녹음 중... 3초 후 분석');setTimeout(()=>{const sc=62+Math.floor(Math.random()*34);shdwAcc[i]=sc;shdwDone[i]=true;shdwRec[i]=false;renderShadow();saveProgress();showToast('유사도 '+sc+'%');},3000);}
 }
 function wordOverlap(got,ref){const gw=got.replace(/[^a-z\s]/g,'').split(/\s+/).filter(Boolean);const rw=ref.replace(/[^a-z\s]/g,'').split(/\s+/).filter(Boolean);if(!rw.length)return 0;return Math.round(rw.filter(w=>gw.includes(w)).length/rw.length*100);}
 function markShadowDone(){showToast('섀도잉 완료!');go('final');}
@@ -1030,8 +1108,20 @@ function initDraft(){
     };
     el.appendChild(d);
   });
-  // 단계 초기화
-  goStep(1,true);
+  // 저장된 드래프트 복원
+  const P=progressStore[currentWeek]||{};
+  const e1=document.getElementById('dta-step1'),e2=document.getElementById('dta-step2'),e3=document.getElementById('dta');
+  if(e1)e1.value=P.d1||'';
+  if(e2)e2.value=P.d2||'';
+  if(e3)e3.value=P.d3||'';
+  checkStep1();checkStep2();liveChk();
+  if(P.draftSubmitted){
+    submitDraft(true);            // 제출 완료 화면 복원(토스트 없이)
+  } else {
+    let st=P.draftStep||1;
+    if(st<1||st>3)st=1;
+    goStep(st,true);
+  }
 }
 
 function goStep(n, silent){
@@ -1057,12 +1147,14 @@ function goStep(n, silent){
     liveChk();
   }
   if(!silent) window.scrollTo({top:0,behavior:'smooth'});
+  saveProgress();
 }
 
 function checkStep1(){
   const v=document.getElementById('dta-step1').value.trim();
   document.getElementById('step1-counter').textContent=v.length+'자 입력됨';
   document.getElementById('step1-next').disabled=v.length<10;
+  saveProgress();
 }
 
 function checkStep2(){
@@ -1070,6 +1162,7 @@ function checkStep2(){
   const wc=v.split(/\s+/).filter(Boolean).length;
   document.getElementById('step2-counter').textContent=wc+'단어 입력됨';
   document.getElementById('step2-next').disabled=wc<15;
+  saveProgress();
 }
 
 function setChip(id,t,ok){const e=document.getElementById(id);if(!e)return;e.textContent=t;e.className='dchip'+(ok?' ok':' ng');}
@@ -1092,6 +1185,7 @@ function liveChk(){
   setChip('dc-ref',refIncluded?'인용문 포함 ✓':'인용문 미포함',refIncluded);
   draftOk=(wc>=5&&pc>=3&&wordCount>=120);
   document.getElementById('dsub').disabled=!draftOk;
+  saveProgress();
 }
 
 function runAi(){
@@ -1125,7 +1219,7 @@ function runAi(){
       : '<strong style="color:#791F1F">미충족 항목을 보완 후 재검사하세요.</strong>'}`;
 }
 
-function submitDraft(){
+function submitDraft(silent){
   // 제출 화면 전환
   document.getElementById('draft-step3').style.display='none';
   document.getElementById('draft-submitted').style.display='block';
@@ -1149,7 +1243,8 @@ function submitDraft(){
     </div>`;
   // 드래프트 진도 완료 표시
   document.getElementById('ps-f').classList.remove('done');
-  showToast('드래프트 제출 완료! 이제 최종 녹음을 진행하세요');
+  if(!silent)showToast('드래프트 제출 완료! 이제 최종 녹음을 진행하세요');
+  saveProgress();
 }
 
 // ==================== FINAL REC ====================
@@ -1161,7 +1256,7 @@ function toggleRec(){
 }
 function playPrev(){const ico=document.getElementById('pp-ico'),lbl=document.getElementById('pp-lbl'),pg=document.getElementById('play-prog');if(playInt){clearInterval(playInt);playInt=null;ico.className='ti ti-player-play';lbl.textContent='미리 듣기';pg.style.width='0%';return;}ico.className='ti ti-player-stop';lbl.textContent='중지';let p=0;playInt=setInterval(()=>{p+=2;pg.style.width=p+'%';if(p>=100){clearInterval(playInt);playInt=null;ico.className='ti ti-player-play';lbl.textContent='미리 듣기';}},60);}
 function resetRec(){clearInterval(recTick);clearInterval(playInt);playInt=null;recOn=false;recSec=0;hasRec=false;document.getElementById('rec-main').classList.remove('recording');document.getElementById('rec-ico').className='ti ti-microphone';document.getElementById('rec-timer').textContent='0:00';document.getElementById('rec-timer').classList.remove('on');document.getElementById('rec-status').textContent='버튼을 눌러 녹음을 시작하세요';document.getElementById('rec-status').style.color='';document.getElementById('rec-preview').style.display='none';document.getElementById('rec-actions').style.display='none';document.getElementById('play-prog').style.width='0%';document.querySelectorAll('.rbar').forEach(b=>{b.classList.remove('on');b.style.height='8px';});}
-function submitFinal(){submitted=true;document.getElementById('rec-area-wrap').style.display='none';showRubric();document.getElementById('rubric-result').style.display='block';document.getElementById('ps-f').classList.add('done');document.getElementById('pv-f').textContent='제출완료';showToast('AI 채점 완료!');}
+function submitFinal(){submitted=true;document.getElementById('rec-area-wrap').style.display='none';showRubric();document.getElementById('rubric-result').style.display='block';document.getElementById('ps-f').classList.add('done');document.getElementById('pv-f').textContent='제출완료';showToast('AI 채점 완료!');saveProgress();}
 
 const RUBRIC_ITEMS=[
   {label:'발음 정확성', key:'pron', max:4, fb:'발음이 전반적으로 명확합니다. 연음 처리에 추가 연습을 권합니다.'},
@@ -1377,6 +1472,76 @@ function exportInst(){
 }
 function importInst(e){
   const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.weeks&&d.content){instEditData=d;if(!instEditData.cadets)instEditData.cadets=[];buildInstWeekSels();loadInstWeek(instEditData.weeks[0]?.id);renderInstWeeks();buildGradeWeekSel();renderGradeTable();showToast('JSON 불러오기 완료');}else showToast('올바른 파일이 아닙니다');}catch{showToast('파일 오류');}};r.readAsText(f);e.target.value='';
+}
+
+// ==================== 성적 수합 (생도 내보내기 / 교수자 병합) ====================
+// [생도] 내 성적·학습기록을 파일로 내보내 교수자에게 제출
+function exportMyResults(){
+  if(!cadetName){showToast('먼저 생도 이름을 입력하세요');return;}
+  const rec=(DATA.cadets||[]).find(c=>c.name===cadetName)||{name:cadetName,scores:{}};
+  const scores=rec.scores||{};
+  // 제출한 스피치(드래프트) 모음 — 참고 기록용
+  const submissions={};
+  Object.keys(progressStore||{}).forEach(wid=>{
+    const p=progressStore[wid]||{};
+    if(p.finalDone||(p.d3&&p.d3.trim())){
+      submissions[wid]={step1:p.d1||'',step2:p.d2||'',speech:p.d3||'',finalDone:!!p.finalDone};
+    }
+  });
+  const payload={
+    app:'kma-english-speech', kind:'cadet-results', version:1,
+    name:cadetName, scores:scores, submissions:submissions,
+    weeks:(DATA.weeks||[]).map(w=>({id:w.id,label:w.label})),
+    exportedAt:new Date().toISOString()
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  const safe=(cadetName||'cadet').replace(/[^0-9A-Za-z가-힣]/g,'')||'cadet';
+  a.download='kma_'+safe+'_'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();a.remove();
+  const n=Object.keys(scores).length;
+  showToast(n>0?('제출 파일 저장 완료 · 성적 '+n+'개 회차 (교수자에게 제출하세요)'):'제출 파일 저장 완료 · 아직 채점된 회차 없음');
+}
+
+// [교수자] 여러 생도의 성적 파일을 한 번에 불러와 성적표에 병합
+function importCadetResults(e){
+  const files=Array.from(e.target.files||[]);
+  if(!files.length)return;
+  if(!instEditData)instEditData=JSON.parse(JSON.stringify(DATA));
+  if(!instEditData.cadets)instEditData.cadets=[];
+  let added=0,updated=0,scoreN=0,bad=0,pending=files.length;
+  files.forEach(f=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      try{
+        const d=JSON.parse(ev.target.result);
+        let list=[];
+        if(d&&d.kind==='cadet-results'&&d.name){list=[{name:String(d.name),scores:d.scores||{}}];}
+        else if(d&&Array.isArray(d.cadets)){list=d.cadets.filter(c=>c&&c.name).map(c=>({name:String(c.name),scores:c.scores||{}}));}
+        else{bad++;}
+        list.forEach(item=>{
+          let cd=instEditData.cadets.find(c=>c.name===item.name);
+          if(!cd){cd={name:item.name,scores:{}};instEditData.cadets.push(cd);added++;}
+          else updated++;
+          if(!cd.scores)cd.scores={};
+          Object.keys(item.scores||{}).forEach(wk=>{if(item.scores[wk]!=null){cd.scores[wk]=item.scores[wk];scoreN++;}});
+        });
+      }catch(err){bad++;}
+      if(--pending===0)finishCadetImport(added,updated,scoreN,bad);
+    };
+    r.readAsText(f);
+  });
+  e.target.value='';
+}
+function finishCadetImport(added,updated,scoreN,bad){
+  instEditData.cadets.sort((a,b)=>koreanSort(a.name,b.name));
+  // 수합 결과 즉시 저장(유실 방지) — 학생 화면은 건드리지 않음
+  DATA=JSON.parse(JSON.stringify(instEditData));
+  try{localStorage.setItem('kma_data',JSON.stringify(DATA));}catch(e){}
+  buildGradeWeekSel();renderGradeTable();
+  let msg='성적 병합·저장 완료 · 신규 '+added+'명, 갱신 '+updated+'명, 점수 '+scoreN+'개';
+  if(bad)msg+=' · 오류 '+bad+'개';
+  showToast(msg);
 }
 
 // ==================== GRADE TABLE ====================
