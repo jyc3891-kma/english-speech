@@ -476,8 +476,9 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 <div id="sc-final" class="sc">
   <div class="card">
     <div class="ct"><i class="ti ti-microphone"></i>최종 스피치 녹음 및 AI 즉시 평가</div>
-    <div class="info-box"><i class="ti ti-info-circle"></i><span><strong>1~2분간 끊김 없이 녹음</strong>하세요. 제출 즉시 AI가 자동 채점합니다.</span></div>
+    <div class="info-box"><i class="ti ti-info-circle"></i><span><strong>1~2분간 끊김 없이 녹음</strong>하세요. 처음 누르면 마이크 권한을 허용해주세요. 제출 즉시 AI가 자동 채점합니다.</span></div>
     <div id="rec-area-wrap" class="rec-area">
+      <audio id="rec-audio-el" style="display:none"></audio>
       <div class="rec-status" id="rec-status">버튼을 눌러 녹음을 시작하세요</div>
       <div class="rec-timer" id="rec-timer">0:00</div>
       <div class="rec-wave" id="rec-wave">
@@ -844,7 +845,8 @@ let currentWeek=DATA.weeks[0].id;
 let WORDS=[],PATS=[],SHADOWS=[];
 let cardIdx=0,seenCount=0,flipped=false;
 let patDone=[],shdwDone=[],shdwAcc=[],shdwRec=[];
-let draftOk=false,recOn=false,recSec=0,recTick=null,hasRec=false,submitted=false,playInt=null;
+let draftOk=false,recOn=false,recSec=0,recTick=null,hasRec=false,submitted=false;
+let mediaRecorder=null,audioChunks=[],micStream=null,audioBase64=null,audioMime='audio/webm';
 let badgeClicks=0,badgeTimer=null;
 let instPw=localStorage.getItem('kma_inst_pw')||'kma2025';
 let instEditData=null;
@@ -921,6 +923,8 @@ function loadWeek(wid){
   shdwRec=Array(SHADOWS.length).fill(false);
   cardIdx=0;seenCount=0;flipped=false;draftOk=false;
   recOn=false;recSec=0;hasRec=false;submitted=false;draftStep=1;
+  stopMicStream();audioBase64=null;audioChunks=[];
+  const aEl=document.getElementById('rec-audio-el');if(aEl){aEl.pause();aEl.removeAttribute('src');aEl.load();}
   // 저장된 진행 상황 복원 (단어·패턴·섀도잉)
   restoreProgress(wid);
   document.getElementById('vocab-title').textContent='어휘 플래시카드 · '+(c.title||wid)+' ('+WORDS.length+'단어)';
@@ -961,9 +965,10 @@ function saveProgress(){
     d3:g('dta')?g('dta').value:'',
     draftSubmitted:subEl?subEl.style.display==='block':false,
     finalDone:submitted,
-    recSec:recSec
+    recSec:recSec,
+    recAudio:audioBase64||(progressStore[currentWeek]?progressStore[currentWeek].recAudio:null)||null
   };
-  try{localStorage.setItem('kma_progress',JSON.stringify(progressStore));}catch(e){}
+  try{localStorage.setItem('kma_progress',JSON.stringify(progressStore));}catch(e){showToast('저장 용량 초과 · 녹음 파일이 너무 클 수 있습니다');}
 }
 
 function restoreProgress(wid){
@@ -979,7 +984,12 @@ function restoreProgress(wid){
 
 // 최종 녹음 영역을 초기(미녹음) 상태로 되돌림
 function resetFinalUI(){
-  clearInterval(recTick);clearInterval(playInt);playInt=null;
+  clearInterval(recTick);
+  const aEl=document.getElementById('rec-audio-el');
+  if(aEl){aEl.pause();aEl.removeAttribute('src');aEl.load();}
+  const ppIco=document.getElementById('pp-ico'),ppLbl=document.getElementById('pp-lbl');
+  if(ppIco)ppIco.className='ti ti-player-play';
+  if(ppLbl)ppLbl.textContent='미리 듣기';
   const g=id=>document.getElementById(id);
   if(g('rec-area-wrap'))g('rec-area-wrap').style.display='';
   if(g('rubric-result'))g('rubric-result').style.display='none';
@@ -999,6 +1009,11 @@ function restoreFinalUI(wid){
   if(!P.finalDone)return;
   submitted=true;
   recSec=Number.isInteger(P.recSec)?P.recSec:0;
+  if(P.recAudio){
+    audioBase64=P.recAudio;
+    const aEl=document.getElementById('rec-audio-el');
+    if(aEl)aEl.src=audioBase64;
+  }
   document.getElementById('rec-area-wrap').style.display='none';
   showRubric();
   document.getElementById('rubric-result').style.display='block';
@@ -1247,16 +1262,142 @@ function submitDraft(silent){
   saveProgress();
 }
 
-// ==================== FINAL REC ====================
-function toggleRec(){
-  if(submitted)return;recOn=!recOn;
-  const btn=document.getElementById('rec-main'),bars=document.querySelectorAll('.rbar');
-  if(recOn){btn.classList.add('recording');document.getElementById('rec-ico').className='ti ti-player-stop';document.getElementById('rec-status').textContent='녹음 중 — 준비된 스크립트를 보며 말하세요';document.getElementById('rec-status').style.color='var(--rd)';document.getElementById('rec-timer').classList.add('on');document.getElementById('rec-actions').style.display='none';document.getElementById('rec-preview').style.display='none';recTick=setInterval(()=>{recSec++;const m=Math.floor(recSec/60),s=recSec%60;document.getElementById('rec-timer').textContent=m+':'+(s<10?'0':'')+s;bars.forEach(b=>{b.classList.add('on');b.style.height=(5+Math.floor(Math.random()*18))+'px';});},1000);}
-  else{clearInterval(recTick);btn.classList.remove('recording');document.getElementById('rec-ico').className='ti ti-microphone';document.getElementById('rec-status').textContent='녹음 완료 — 미리 듣고 제출하세요';document.getElementById('rec-status').style.color='';document.getElementById('rec-timer').classList.remove('on');bars.forEach(b=>{b.classList.remove('on');b.style.height='8px';});hasRec=true;const m=Math.floor(recSec/60),s=recSec%60;document.getElementById('rec-dur').textContent='길이: '+m+'분 '+s+'초';document.getElementById('rec-preview').style.display='block';document.getElementById('rec-actions').style.display='flex';}
+// ==================== FINAL REC (실제 마이크 녹음) ====================
+function stopMicStream(){
+  if(micStream){try{micStream.getTracks().forEach(t=>t.stop());}catch(e){}micStream=null;}
+  if(mediaRecorder&&mediaRecorder.state!=='inactive'){try{mediaRecorder.stop();}catch(e){}}
+  mediaRecorder=null;
 }
-function playPrev(){const ico=document.getElementById('pp-ico'),lbl=document.getElementById('pp-lbl'),pg=document.getElementById('play-prog');if(playInt){clearInterval(playInt);playInt=null;ico.className='ti ti-player-play';lbl.textContent='미리 듣기';pg.style.width='0%';return;}ico.className='ti ti-player-stop';lbl.textContent='중지';let p=0;playInt=setInterval(()=>{p+=2;pg.style.width=p+'%';if(p>=100){clearInterval(playInt);playInt=null;ico.className='ti ti-player-play';lbl.textContent='미리 듣기';}},60);}
-function resetRec(){clearInterval(recTick);clearInterval(playInt);playInt=null;recOn=false;recSec=0;hasRec=false;document.getElementById('rec-main').classList.remove('recording');document.getElementById('rec-ico').className='ti ti-microphone';document.getElementById('rec-timer').textContent='0:00';document.getElementById('rec-timer').classList.remove('on');document.getElementById('rec-status').textContent='버튼을 눌러 녹음을 시작하세요';document.getElementById('rec-status').style.color='';document.getElementById('rec-preview').style.display='none';document.getElementById('rec-actions').style.display='none';document.getElementById('play-prog').style.width='0%';document.querySelectorAll('.rbar').forEach(b=>{b.classList.remove('on');b.style.height='8px';});}
-function submitFinal(){submitted=true;document.getElementById('rec-area-wrap').style.display='none';showRubric();document.getElementById('rubric-result').style.display='block';document.getElementById('ps-f').classList.add('done');document.getElementById('pv-f').textContent='제출완료';showToast('AI 채점 완료!');saveProgress();}
+
+function pickMimeType(){
+  const cands=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'];
+  for(const c of cands){if(window.MediaRecorder&&MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(c))return c;}
+  return '';
+}
+
+async function toggleRec(){
+  if(submitted)return;
+  const btn=document.getElementById('rec-main'),bars=document.querySelectorAll('.rbar');
+  if(!recOn){
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+      showToast('이 브라우저는 마이크 녹음을 지원하지 않습니다');return;
+    }
+    let stream;
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    }catch(err){
+      showToast('마이크 권한이 거부되었습니다. 브라우저 설정에서 허용해주세요');
+      return;
+    }
+    micStream=stream;
+    audioChunks=[];
+    audioMime=pickMimeType();
+    try{
+      mediaRecorder=audioMime?new MediaRecorder(stream,{mimeType:audioMime}):new MediaRecorder(stream);
+    }catch(e){
+      mediaRecorder=new MediaRecorder(stream);
+    }
+    mediaRecorder.ondataavailable=e=>{if(e.data&&e.data.size>0)audioChunks.push(e.data);};
+    mediaRecorder.onstop=()=>{
+      const blob=new Blob(audioChunks,{type:mediaRecorder.mimeType||audioMime||'audio/webm'});
+      const reader=new FileReader();
+      reader.onload=()=>{
+        audioBase64=reader.result;
+        const aEl=document.getElementById('rec-audio-el');
+        if(aEl)aEl.src=audioBase64;
+        saveProgress();
+      };
+      reader.readAsDataURL(blob);
+      stopMicStream();
+    };
+    mediaRecorder.start();
+    recOn=true;
+    recSec=0;
+    btn.classList.add('recording');
+    document.getElementById('rec-ico').className='ti ti-player-stop';
+    document.getElementById('rec-status').textContent='녹음 중 — 준비된 스크립트를 보며 말하세요';
+    document.getElementById('rec-status').style.color='var(--rd)';
+    document.getElementById('rec-timer').classList.add('on');
+    document.getElementById('rec-actions').style.display='none';
+    document.getElementById('rec-preview').style.display='none';
+    recTick=setInterval(()=>{
+      recSec++;
+      const m=Math.floor(recSec/60),s=recSec%60;
+      document.getElementById('rec-timer').textContent=m+':'+(s<10?'0':'')+s;
+      bars.forEach(b=>{b.classList.add('on');b.style.height=(5+Math.floor(Math.random()*18))+'px';});
+    },1000);
+  } else {
+    recOn=false;
+    clearInterval(recTick);
+    btn.classList.remove('recording');
+    document.getElementById('rec-ico').className='ti ti-microphone';
+    document.getElementById('rec-status').textContent='녹음 완료 — 미리 듣고 제출하세요';
+    document.getElementById('rec-status').style.color='';
+    document.getElementById('rec-timer').classList.remove('on');
+    bars.forEach(b=>{b.classList.remove('on');b.style.height='8px';});
+    hasRec=true;
+    const m=Math.floor(recSec/60),s=recSec%60;
+    document.getElementById('rec-dur').textContent='길이: '+m+'분 '+s+'초';
+    document.getElementById('rec-preview').style.display='block';
+    document.getElementById('rec-actions').style.display='flex';
+    if(mediaRecorder&&mediaRecorder.state!=='inactive')mediaRecorder.stop();
+    else stopMicStream();
+  }
+}
+
+function playPrev(){
+  const ico=document.getElementById('pp-ico'),lbl=document.getElementById('pp-lbl'),pg=document.getElementById('play-prog');
+  const aEl=document.getElementById('rec-audio-el');
+  if(!aEl||!aEl.src){showToast('재생할 녹음이 없습니다');return;}
+  if(!aEl.paused){
+    aEl.pause();
+    ico.className='ti ti-player-play';lbl.textContent='미리 듣기';
+    return;
+  }
+  ico.className='ti ti-player-stop';lbl.textContent='중지';
+  aEl.currentTime=0;
+  aEl.play().catch(()=>{showToast('재생 오류가 발생했습니다');ico.className='ti ti-player-play';lbl.textContent='미리 듣기';});
+  aEl.ontimeupdate=()=>{
+    if(aEl.duration&&isFinite(aEl.duration)){
+      pg.style.width=(aEl.currentTime/aEl.duration*100)+'%';
+    }
+  };
+  aEl.onended=()=>{
+    ico.className='ti ti-player-play';lbl.textContent='미리 듣기';pg.style.width='0%';
+  };
+}
+
+function resetRec(){
+  clearInterval(recTick);
+  stopMicStream();
+  recOn=false;recSec=0;hasRec=false;audioBase64=null;audioChunks=[];
+  const aEl=document.getElementById('rec-audio-el');
+  if(aEl){aEl.pause();aEl.removeAttribute('src');aEl.load();}
+  document.getElementById('rec-main').classList.remove('recording');
+  document.getElementById('rec-ico').className='ti ti-microphone';
+  document.getElementById('rec-timer').textContent='0:00';
+  document.getElementById('rec-timer').classList.remove('on');
+  document.getElementById('rec-status').textContent='버튼을 눌러 녹음을 시작하세요';
+  document.getElementById('rec-status').style.color='';
+  document.getElementById('rec-preview').style.display='none';
+  document.getElementById('rec-actions').style.display='none';
+  document.getElementById('play-prog').style.width='0%';
+  document.getElementById('pp-ico').className='ti ti-player-play';
+  document.getElementById('pp-lbl').textContent='미리 듣기';
+  document.querySelectorAll('.rbar').forEach(b=>{b.classList.remove('on');b.style.height='8px';});
+}
+
+function submitFinal(){
+  if(!audioBase64){showToast('먼저 녹음을 완료해주세요');return;}
+  submitted=true;
+  document.getElementById('rec-area-wrap').style.display='none';
+  showRubric();
+  document.getElementById('rubric-result').style.display='block';
+  document.getElementById('ps-f').classList.add('done');
+  document.getElementById('pv-f').textContent='제출완료';
+  showToast('AI 채점 완료! 음성 녹음이 함께 저장되었습니다');
+  saveProgress();
+}
 
 const RUBRIC_ITEMS=[
   {label:'발음 정확성', key:'pron', max:4, fb:'발음이 전반적으로 명확합니다. 연음 처리에 추가 연습을 권합니다.'},
@@ -1482,10 +1623,12 @@ function exportMyResults(){
   const scores=rec.scores||{};
   // 제출한 스피치(드래프트) 모음 — 참고 기록용
   const submissions={};
+  let audioCount=0;
   Object.keys(progressStore||{}).forEach(wid=>{
     const p=progressStore[wid]||{};
     if(p.finalDone||(p.d3&&p.d3.trim())){
-      submissions[wid]={step1:p.d1||'',step2:p.d2||'',speech:p.d3||'',finalDone:!!p.finalDone};
+      submissions[wid]={step1:p.d1||'',step2:p.d2||'',speech:p.d3||'',finalDone:!!p.finalDone,audio:p.recAudio||null};
+      if(p.recAudio)audioCount++;
     }
   });
   const payload={
@@ -1494,13 +1637,15 @@ function exportMyResults(){
     weeks:(DATA.weeks||[]).map(w=>({id:w.id,label:w.label})),
     exportedAt:new Date().toISOString()
   };
-  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const jsonStr=JSON.stringify(payload,null,2);
+  const blob=new Blob([jsonStr],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   const safe=(cadetName||'cadet').replace(/[^0-9A-Za-z가-힣]/g,'')||'cadet';
   a.download='kma_'+safe+'_'+new Date().toISOString().slice(0,10)+'.json';
   document.body.appendChild(a);a.click();a.remove();
   const n=Object.keys(scores).length;
-  showToast(n>0?('제출 파일 저장 완료 · 성적 '+n+'개 회차 (교수자에게 제출하세요)'):'제출 파일 저장 완료 · 아직 채점된 회차 없음');
+  const sizeMB=(jsonStr.length/1024/1024).toFixed(1);
+  showToast(n>0?('제출 파일 저장 완료 · 성적 '+n+'개 회차 · 녹음 '+audioCount+'개 포함 ('+sizeMB+'MB)'):'제출 파일 저장 완료 · 아직 채점된 회차 없음');
 }
 
 // [교수자] 여러 생도의 성적 파일을 한 번에 불러와 성적표에 병합
