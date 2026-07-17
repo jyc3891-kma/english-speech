@@ -102,6 +102,30 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 .p-full{font-size:12px;border-radius:6px;padding:7px 10px;margin-top:4px;display:none;line-height:1.6}
 .p-full span{color:var(--bl);font-weight:500}
 
+/* INTEL DECODE */
+.intel-briefing{background:#12181f;border-color:#2a3441}
+.intel-briefing .ct{color:#e2e8f0}
+.intel-briefing .ct i{color:#e8a33d}
+.intel-info{background:#241414;border-color:#5c2a2a;color:#f0b8b8}
+.intel-card{border:0.5px solid #2a3441;border-radius:var(--r8);padding:12px 14px;margin-bottom:10px;background:#1a2129;position:relative}
+.intel-card.solved{border-color:#3B6D11;background:#16210f}
+.intel-card.locked{opacity:.5}
+.intel-tag{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:1px;color:#e8a33d;border:0.5px solid #5c4419;background:#2a2010;padding:2px 8px;border-radius:3px;margin-bottom:8px}
+.intel-tag.solved{color:#8fd15e;border-color:#3B6D11;background:#16210f}
+.intel-passage{font-size:13px;color:#cbd5e1;line-height:2;font-family:'JetBrains Mono',monospace;margin-bottom:10px}
+.redact{background:#0b0f14;color:#0b0f14;padding:1px 6px;border-radius:2px;user-select:none;letter-spacing:2px}
+.intel-row{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+.intel-inp{border:0.5px solid #3a4756;border-radius:6px;padding:6px 10px;font-size:13px;background:#0f151b;color:#e2e8f0;outline:none;width:160px;font-family:'JetBrains Mono',monospace}
+.intel-inp:focus{border-color:#e8a33d}
+.intel-inp.wrong{border-color:#A32D2D;background:#241414}
+.intel-btn{background:#e8a33d;color:#1a1206;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif}
+.intel-btn:disabled{opacity:.4;cursor:not-allowed}
+.intel-listen{background:#2a3441;color:#e2e8f0;border:none;border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Noto Sans KR',sans-serif}
+.intel-fb{font-size:11px;font-weight:500;margin-top:4px}
+.intel-fb.ok{color:#8fd15e}.intel-fb.ng{color:#e08080}
+.intel-hint{font-size:11px;color:#e8a33d;margin-top:5px;background:#241a0a;border:0.5px dashed #5c4419;border-radius:6px;padding:6px 9px}
+.intel-lock-msg{font-size:12px;color:#7d8a99;display:flex;align-items:center;gap:6px}
+
 /* SHADOW */
 .shdw-line{background:var(--bg3);border:0.5px solid var(--bd);border-radius:var(--r8);padding:12px 14px;margin-bottom:8px;transition:all .2s}
 .shdw-en{font-size:14px;color:var(--tx);line-height:1.8;margin-bottom:4px;font-family:'Playfair Display',serif;font-style:italic}
@@ -290,6 +314,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 <nav class="nav">
   <button class="nb on" onclick="go('vocab')" id="nb-vocab"><i class="ti ti-cards"></i>단어장</button>
   <button class="nb" onclick="go('pattern')" id="nb-pattern"><i class="ti ti-puzzle"></i>패턴 드릴</button>
+  <button class="nb" onclick="go('intel')" id="nb-intel"><i class="ti ti-shield-lock"></i>정보해독</button>
   <button class="nb" onclick="go('shadow')" id="nb-shadow"><i class="ti ti-ear"></i>섀도잉</button>
   <button class="nb" onclick="go('draft')" id="nb-draft"><i class="ti ti-edit"></i>드래프트</button>
   <button class="nb" onclick="go('final')" id="nb-final"><i class="ti ti-microphone"></i>최종 제출</button>
@@ -298,9 +323,10 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 <div class="body">
 
 <!-- PROGRESS -->
-<div class="pstrip">
+<div class="pstrip" style="grid-template-columns:repeat(5,1fr)">
   <div class="pi" id="ps-v"><div class="pl">단어 학습</div><div class="pv" id="pv-v">-</div></div>
   <div class="pi" id="ps-p"><div class="pl">패턴 드릴</div><div class="pv" id="pv-p">-</div></div>
+  <div class="pi" id="ps-i"><div class="pl">정보해독</div><div class="pv" id="pv-i">-</div></div>
   <div class="pi" id="ps-s"><div class="pl">섀도잉</div><div class="pv" id="pv-s">미완료</div></div>
   <div class="pi" id="ps-f"><div class="pl">최종 제출</div><div class="pv" id="pv-f">미제출</div></div>
 </div>
@@ -350,6 +376,24 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
     <div class="ct"><i class="ti ti-puzzle"></i><span id="pattern-title">패턴 빈칸 드릴</span></div>
     <div class="info-box"><i class="ti ti-info-circle"></i><span><strong>문장 듣기</strong> 후 빈칸에 단어를 입력하고 <strong>제출</strong>을 누르세요.</span></div>
     <div id="pat-list"></div>
+  </div>
+</div>
+
+<!-- ===== INTEL DECODE (정보해독) ===== -->
+<div id="sc-intel" class="sc">
+  <div class="card intel-briefing">
+    <div class="ct"><i class="ti ti-shield-lock"></i><span id="intel-title">전장 정보 분석</span></div>
+    <div class="info-box intel-info"><i class="ti ti-alert-triangle"></i><span><strong>작전 브리핑:</strong> 문맥을 분석해 검게 마스킹(▓▓▓)된 자리에 들어갈 <strong>영어 단어</strong>를 그대로 입력하세요. (한글 해석이 아닙니다. 예: honored)</span></div>
+    <div class="fnav">
+      <span style="font-size:11px;color:var(--tx3)" id="intel-c">첩보 1 / -</span>
+      <span style="font-size:11px;color:var(--tx3)" id="intel-prog">해독 완료: 0개</span>
+    </div>
+    <div id="intel-list"></div>
+    <div style="border-top:0.5px solid var(--bd);padding-top:10px;display:flex;justify-content:flex-end">
+      <button style="background:var(--gn-tx);color:var(--gn-bg);border:none;border-radius:7px;padding:7px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Noto Sans KR',sans-serif" id="intel-done-btn" onclick="markIntelDone()" disabled>
+        <i class="ti ti-check"></i> 전 첩보 해독 완료 · 섀도잉으로 이동
+      </button>
+    </div>
   </div>
 </div>
 
@@ -997,6 +1041,7 @@ let currentWeek=DATA.weeks[0].id;
 let WORDS=[],PATS=[],SHADOWS=[];
 let cardIdx=0,seenCount=0,flipped=false;
 let patDone=[],shdwDone=[],shdwAcc=[],shdwRec=[];
+let INTEL=[],intelDone=[],intelAttempts=[];
 let draftOk=false,recOn=false,recSec=0,recTick=null,hasRec=false,submitted=false;
 let mediaRecorder=null,audioChunks=[],micStream=null,audioBase64=null,audioMime='audio/webm';
 let badgeClicks=0,badgeTimer=null;
@@ -1073,23 +1118,28 @@ function loadWeek(wid){
   shdwDone=Array(SHADOWS.length).fill(false);
   shdwAcc=Array(SHADOWS.length).fill(0);
   shdwRec=Array(SHADOWS.length).fill(false);
+  INTEL=buildIntelItems(WORDS,PATS);
+  intelDone=Array(INTEL.length).fill(false);
+  intelAttempts=Array(INTEL.length).fill(0);
   cardIdx=0;seenCount=0;flipped=false;draftOk=false;
   recOn=false;recSec=0;hasRec=false;submitted=false;draftStep=1;
   stopMicStream();audioBase64=null;audioChunks=[];
   const aEl=document.getElementById('rec-audio-el');if(aEl){aEl.pause();aEl.removeAttribute('src');aEl.load();}
-  // 저장된 진행 상황 복원 (단어·패턴·섀도잉)
+  // 저장된 진행 상황 복원 (단어·패턴·정보해독·섀도잉)
   restoreProgress(wid);
   document.getElementById('vocab-title').textContent='어휘 플래시카드 · '+(c.title||wid)+' ('+WORDS.length+'단어)';
   document.getElementById('pattern-title').textContent='패턴 빈칸 드릴 · '+(c.title||wid);
+  document.getElementById('intel-title').textContent='전장 정보 분석 · '+(c.title||wid);
   document.getElementById('shadow-title').textContent='섀도잉 · '+(c.title||wid);
   document.getElementById('pv-v').textContent=(WORDS.length&&seenCount>=WORDS.length)?'완료':seenCount+'/'+WORDS.length;
   document.getElementById('pv-p').textContent='0/'+PATS.length;
+  document.getElementById('pv-i').textContent='0/'+INTEL.length;
   document.getElementById('pv-s').textContent='미완료';
   document.getElementById('pv-f').textContent='미제출';
-  ['ps-v','ps-p','ps-s','ps-f'].forEach(id=>document.getElementById(id).classList.remove('done'));
+  ['ps-v','ps-p','ps-i','ps-s','ps-f'].forEach(id=>document.getElementById(id).classList.remove('done'));
   if(WORDS.length&&seenCount>=WORDS.length)document.getElementById('ps-v').classList.add('done');
   resetFinalUI();
-  renderCard();renderPats();if(PATS.length)updPat();renderShadow();initDraft();
+  renderCard();renderPats();if(PATS.length)updPat();renderIntel();renderShadow();initDraft();
   restoreFinalUI(wid);
   isRestoring=false;
   go('vocab');
@@ -1109,6 +1159,8 @@ function saveProgress(){
     cardIdx:cardIdx,
     seenCount:seenCount,
     patDone:patDone.slice(),
+    intelDone:intelDone.slice(),
+    intelAttempts:intelAttempts.slice(),
     shdwDone:shdwDone.slice(),
     shdwAcc:shdwAcc.slice(),
     draftStep:draftStep,
@@ -1129,6 +1181,8 @@ function restoreProgress(wid){
   if(Number.isInteger(P.cardIdx)&&P.cardIdx<WORDS.length)cardIdx=P.cardIdx;
   if(Number.isInteger(P.seenCount))seenCount=Math.min(P.seenCount,WORDS.length);
   if(Array.isArray(P.patDone)&&P.patDone.length===PATS.length)patDone=P.patDone.slice();
+  if(Array.isArray(P.intelDone)&&P.intelDone.length===INTEL.length)intelDone=P.intelDone.slice();
+  if(Array.isArray(P.intelAttempts)&&P.intelAttempts.length===INTEL.length)intelAttempts=P.intelAttempts.slice();
   if(Array.isArray(P.shdwDone)&&P.shdwDone.length===SHADOWS.length)shdwDone=P.shdwDone.slice();
   if(Array.isArray(P.shdwAcc)&&P.shdwAcc.length===SHADOWS.length)shdwAcc=P.shdwAcc.slice();
   // recSec은 최종 제출 완료 시에만 restoreFinalUI에서 복원
@@ -1214,6 +1268,128 @@ function speakPat(i){if('speechSynthesis' in window){window.speechSynthesis.canc
 function chkPat(i){const inp=document.getElementById('pb-'+i);const val=inp.value.trim().toLowerCase();if(val===PATS[i].a){inp.className='p-inp c';inp.readOnly=true;document.getElementById('pf-'+i).textContent='정답!';document.getElementById('pf-'+i).className='p-fb ok';document.getElementById('pi-'+i).classList.add('ok');document.getElementById('pb-btn-'+i).disabled=true;patDone[i]=true;showFullSentence(i,true);updPat();saveProgress();}else{inp.className='p-inp w';document.getElementById('pf-'+i).textContent='오답. 다시 시도하세요.';document.getElementById('pf-'+i).className='p-fb ng';setTimeout(()=>{inp.className='p-inp';},1200);showFullSentence(i,false);}}
 function showFullSentence(i,ok){const box=document.getElementById('pf-full-'+i);const h=PATS[i].full.replace(PATS[i].a,'<span>'+PATS[i].a+'</span>');box.style.display='block';box.style.background=ok?'#EAF3DE':'#E6F1FB';box.style.color=ok?'#27500A':'#0C447C';box.innerHTML=(ok?'✓ 정답 문장: ':'정답 확인: ')+h;}
 function updPat(){const n=patDone.filter(Boolean).length;document.getElementById('pv-p').textContent=n+'/'+PATS.length;if(n>=PATS.length){document.getElementById('ps-p').classList.add('done');document.getElementById('pv-p').textContent='완료';}}
+
+// ==================== INTEL DECODE (정보해독 · 전장 정보 분석) ====================
+// 기존 단어장(최대 10개)+패턴(최대 5개)을 재활용해 자동으로 문항을 구성한다.
+function findIntelTarget(wordForm,text){
+  const cands=[wordForm];
+  const strips=[/^be\s+/i,/^to\s+/i,/^get\s+/i,/^have\s+/i,/^has\s+/i,/^a\s+/i,/^an\s+/i,/^one'?s\s+/i,/^someone'?s\s+/i,/^something\s+/i];
+  strips.forEach(re=>{if(re.test(wordForm))cands.push(wordForm.replace(re,''));});
+  const tokens=wordForm.replace(/[^a-zA-Z'\s]/g,'').split(/\s+/).filter(Boolean);
+  if(tokens.length){const longest=tokens.reduce((a,b)=>b.length>a.length?b:a,tokens[0]);cands.push(longest);}
+  for(const c of cands){
+    if(!c)continue;
+    const esc=c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const re=new RegExp('\\b'+esc+'\\b','i');
+    if(re.test(text))return c;
+  }
+  return cands[0]||wordForm;
+}
+
+function buildIntelItems(words,pats){
+  const items=[];
+  (words||[]).slice(0,7).forEach(w=>{
+    const w0=(w.w||'').split(',')[0].trim();
+    const text=w.ex||w.w;
+    const found=findIntelTarget(w0||w.w,text);
+    items.push({type:'word',answer:found,altAnswer:w.w,display:text,target:found,hint:w.m||''});
+  });
+  (pats||[]).slice(0,3).forEach(p=>{
+    items.push({type:'pattern',answer:p.a,display:p.full||p.blank,target:p.a,hint:p.hint||''});
+  });
+  return items;
+}
+
+function maskPassage(display,target){
+  if(!target)return display;
+  const esc=target.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const re=new RegExp('\\b'+esc+'\\b','i');
+  const bar='▓'.repeat(Math.max(4,Math.min(target.length,10)));
+  if(re.test(display))return display.replace(re,'<span class="redact">'+bar+'</span>');
+  return display+' <span class="redact">'+bar+'</span>';
+}
+
+function renderIntel(){
+  const el=document.getElementById('intel-list');
+  if(!el)return;
+  el.innerHTML='';
+  if(!INTEL.length){el.innerHTML='<div style="font-size:12px;color:#7d8a99;padding:10px">이번 주차에는 해독할 첩보가 없습니다</div>';return;}
+  const activeIdx=intelDone.findIndex(d=>!d);
+  INTEL.forEach((item,i)=>{
+    const done=intelDone[i];
+    const locked=!done&&activeIdx!==-1&&i>activeIdx;
+    const d=document.createElement('div');
+    d.id='intel-'+i;
+    d.className='intel-card'+(done?' solved':'')+(locked?' locked':'');
+    if(done){
+      d.innerHTML=`<span class="intel-tag solved"><i class="ti ti-lock-open-2" style="font-size:11px"></i> 첩보 #${i+1} · 해독 완료</span>
+        <div class="intel-passage">${item.display}</div>`;
+    } else if(locked){
+      d.innerHTML=`<span class="intel-tag"><i class="ti ti-lock" style="font-size:11px"></i> 첩보 #${i+1} · 잠김</span>
+        <div class="intel-lock-msg"><i class="ti ti-lock"></i> 이전 첩보를 먼저 해독하세요</div>`;
+    } else {
+      const attempts=intelAttempts[i]||0;
+      const showHint=attempts>=2;
+      d.innerHTML=`<span class="intel-tag"><i class="ti ti-radar-2" style="font-size:11px"></i> 첩보 #${i+1} · 해독 대기중</span>
+        <div class="intel-passage">${maskPassage(item.display,item.target)}</div>
+        <div class="intel-row">
+          <button class="intel-listen" onclick="speakIntel(${i})"><i class="ti ti-volume"></i> 첩보 듣기</button>
+          <input class="intel-inp" id="intel-inp-${i}" placeholder="영어 단어 입력 (예: honored)" onkeydown="if(event.key==='Enter')checkIntel(${i})">
+          <button class="intel-btn" onclick="checkIntel(${i})">해독 시도</button>
+        </div>
+        <div class="intel-fb" id="intel-fb-${i}"></div>
+        ${showHint?`<div class="intel-hint" id="intel-hint-${i}"><i class="ti ti-bulb"></i> 힌트: ${item.hint||'첫 글자 '+item.target.charAt(0).toUpperCase()+', 총 '+item.target.length+'자'}</div>`:''}`;
+    }
+    el.appendChild(d);
+  });
+  const doneN=intelDone.filter(Boolean).length;
+  document.getElementById('intel-c').textContent='첩보 '+Math.min(doneN+1,INTEL.length)+' / '+INTEL.length;
+  document.getElementById('intel-prog').textContent='해독 완료: '+doneN+'개';
+  document.getElementById('pv-i').textContent=doneN+'/'+INTEL.length;
+  if(doneN>=INTEL.length&&INTEL.length>0){
+    document.getElementById('ps-i').classList.add('done');
+    document.getElementById('pv-i').textContent='완료';
+    document.getElementById('intel-done-btn').disabled=false;
+  } else {
+    document.getElementById('intel-done-btn').disabled=true;
+  }
+}
+
+function speakIntel(i){
+  const item=INTEL[i];if(!item)return;
+  if('speechSynthesis' in window){
+    window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(item.display.replace(/<[^>]+>/g,''));
+    u.lang='en-US';u.rate=0.78;window.speechSynthesis.speak(u);
+  }
+}
+
+function checkIntel(i){
+  const item=INTEL[i];if(!item||intelDone[i])return;
+  const inp=document.getElementById('intel-inp-'+i);
+  const val=(inp.value||'').trim().toLowerCase();
+  const answer=(item.answer||'').trim().toLowerCase();
+  const altAnswer=(item.altAnswer||'').trim().toLowerCase();
+  const fb=document.getElementById('intel-fb-'+i);
+  if(val&&(val===answer||(altAnswer&&val===altAnswer))){
+    intelDone[i]=true;
+    fb.textContent='해독 성공 — 원문 복원됨';
+    fb.className='intel-fb ok';
+    showToast('첩보 #'+(i+1)+' 해독 성공!');
+    saveProgress();
+    renderIntel();
+  } else {
+    intelAttempts[i]=(intelAttempts[i]||0)+1;
+    inp.className='intel-inp wrong';
+    fb.textContent='해독 실패 · 첩보 신뢰도 하락 (시도 '+intelAttempts[i]+'회)';
+    fb.className='intel-fb ng';
+    setTimeout(()=>{if(inp)inp.className='intel-inp';},900);
+    saveProgress();
+    if(intelAttempts[i]>=2)renderIntel();
+  }
+}
+
+function markIntelDone(){showToast('전 첩보 해독 완료!');go('shadow');}
 
 // ==================== SHADOW ====================
 function renderShadow(){
