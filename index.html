@@ -152,6 +152,10 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 .dchip{font-size:11px;padding:3px 9px;border-radius:20px;border:0.5px solid var(--bd);background:var(--bg3);color:var(--tx2);transition:all .2s}
 .dchip.ok{background:var(--gn-bg);color:var(--gn-tx);border-color:#97C459}
 .dchip.ng{background:var(--rd-bg);color:var(--rd-tx);border-color:#F09595}
+.draft-section{margin-bottom:10px}
+.draft-section-label{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:var(--tx2);margin-bottom:5px}
+.ds-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--ac);color:#fff;font-size:10px;font-weight:700;flex-shrink:0}
+.ds-hint{font-size:11px;font-weight:400;color:var(--tx3)}
 .dta{width:100%;border:0.5px solid var(--bd);border-radius:var(--r8);padding:11px;font-size:13px;line-height:1.9;background:var(--bg3);color:var(--tx);resize:none;outline:none;font-family:'Noto Sans KR',sans-serif}
 .dta:focus{border-color:var(--gd)}
 .dai{border-radius:var(--r8);padding:11px;font-size:12px;line-height:1.7;margin-top:8px}
@@ -478,15 +482,35 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 
     <!-- 루브릭 체크 칩 -->
     <div class="dchips">
-      <span class="dchip" id="dc-w">필수단어 0/5</span>
-      <span class="dchip" id="dc-p">핵심표현 0/3</span>
-      <span class="dchip" id="dc-len">단어수 0/120</span>
-      <span class="dchip" id="dc-ref">인용문 미포함</span>
+      <span class="dchip" id="dc-summ">요약 미확인</span>
+      <span class="dchip" id="dc-intro">서론 미확인</span>
+      <span class="dchip" id="dc-body">본론 미확인</span>
+      <span class="dchip" id="dc-concl">결론 미확인</span>
+      <span class="dchip" id="dc-gram">문법 미확인</span>
+      <span class="dchip" id="dc-len">길이 미확인</span>
     </div>
 
-    <textarea class="dta" id="dta" rows="8"
-      placeholder="Start your speech here... (e.g. Good morning. Today I want to share with you a sentence that deeply moved me from Steve Jobs' commencement address...)"
-      oninput="liveChk()"></textarea>
+    <!-- Part 1: 낭독문 요약 -->
+    <div class="draft-section">
+      <div class="draft-section-label">
+        <span class="ds-num">1</span>낭독문 요약
+        <span class="ds-hint">핵심 메시지 3~5문장 + 인상 깊은 문장 1~2개 인용</span>
+      </div>
+      <textarea class="dta" id="dta-summ" rows="3"
+        placeholder="이 연설의 핵심 메시지는 ___입니다. 특히 '___'라는 문장이 인상 깊었습니다."
+        oninput="liveChk()"></textarea>
+    </div>
+
+    <!-- Part 2: 나의 스피치 -->
+    <div class="draft-section">
+      <div class="draft-section-label">
+        <span class="ds-num">2</span>나의 스피치
+        <span class="ds-hint">낭독문 주제와 연결해 서론·본론·결론으로 120~150단어</span>
+      </div>
+      <textarea class="dta" id="dta" rows="7"
+        placeholder="[서론] 주의를 끄는 도입부로 시작하세요.&#10;&#10;[본론] 낭독문과 연결된 나의 경험이나 생각을 2~3가지 논점으로 전개하세요.&#10;&#10;[결론] 핵심 메시지를 강조하며 마무리하세요."
+        oninput="liveChk()"></textarea>
+    </div>
     <div id="dai-box" class="dai ok" style="display:none"></div>
     <div class="dact">
       <button class="breset" onclick="goStep(2)" style="background:var(--bg2);border:0.5px solid var(--bd);color:var(--tx)"><i class="ti ti-arrow-left"></i> 이전</button>
@@ -520,7 +544,36 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 <div id="sc-final" class="sc">
   <div class="card">
     <div class="ct"><i class="ti ti-microphone"></i>최종 스피치 녹음 및 AI 즉시 평가</div>
-    <div class="info-box"><i class="ti ti-info-circle"></i><span><strong>1~2분간 끊김 없이 녹음</strong>하세요. 처음 누르면 마이크 권한을 허용해주세요. 제출 즉시 AI가 자동 채점합니다.</span></div>
+    <!-- 최종 녹음 안내 박스 -->
+    <div style="background:var(--bl-bg);border:0.5px solid var(--bl);border-radius:var(--r12);padding:14px 16px;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:700;color:var(--bl-tx);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-speakerphone"></i> 최종 녹음 안내
+      </div>
+      <div style="font-size:12px;color:var(--bl-tx);line-height:1.9">
+        ① 드래프트에서 작성한 스피치를 충분히 연습하고 <strong>암기</strong>한 뒤 녹음하세요.<br>
+        ② 목표 시간은 <strong>1분~1분 30초 이내</strong>입니다.<br>
+        ③ 녹음 전 조용한 장소를 찾아 마이크에 가까이 말하세요.<br>
+        ④ 미리 듣기로 확인 후 만족스러우면 제출하세요.
+      </div>
+    </div>
+    <!-- 루브릭 안내 박스 -->
+    <div style="background:var(--bg3);border:0.5px solid var(--bd);border-radius:var(--r12);padding:12px 16px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-clipboard-list"></i> AI 채점 기준 (28점 만점)
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div style="font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--bl);flex-shrink:0"></span>발음 정확성 (4점)</div>
+        <div style="font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--bl);flex-shrink:0"></span>유창성 (4점)</div>
+        <div style="font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--bl);flex-shrink:0"></span>구조 — 서론·본론·결론 (4점)</div>
+        <div style="font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--bl);flex-shrink:0"></span>주제 명확성 (4점)</div>
+        <div style="font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--bl);flex-shrink:0"></span>어휘 활용 (4점)</div>
+        <div style="font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--bl);flex-shrink:0"></span>전달력·표현력 (4점)</div>
+        <div style="font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:5px;grid-column:1/-1"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#BA7517;flex-shrink:0"></span>시간 준수 — 목표 1분~1분 30초 (4점)</div>
+      </div>
+      <div style="font-size:11px;color:var(--tx3);margin-top:8px;padding-top:8px;border-top:0.5px solid var(--bd)">
+        ※ AI 채점은 참고용이며, 교수자가 정성 평가를 추가해 최종 점수를 확정합니다.
+      </div>
+    </div>
     <div id="rec-area-wrap" class="rec-area">
       <audio id="rec-audio-el" style="display:none"></audio>
       <div class="rec-status" id="rec-status">버튼을 눌러 녹음을 시작하세요</div>
@@ -1511,55 +1564,110 @@ function checkStep2(){
 function setChip(id,t,ok){const e=document.getElementById(id);if(!e)return;e.textContent=t;e.className='dchip'+(ok?' ok':' ng');}
 
 function liveChk(){
-  const c=DATA.content[currentWeek]||{};
-  const KW=c.keywords||[];
-  const PKW=c.patternKW||[];
-  const t=document.getElementById('dta').value;
-  const tl=t.toLowerCase();
-  const wc=KW.filter(k=>tl.includes(k)).length;
-  const pc=PKW.filter(k=>tl.includes(k)).length;
-  const wordCount=t.trim().split(/\s+/).filter(Boolean).length;
-  // 인용문 포함 여부: Step1 문장 일부가 포함됐는지
-  const q1=document.getElementById('dta-step1')?.value.trim()||'';
-  const refIncluded=q1.length>5&&tl.includes(q1.toLowerCase().substring(0,20));
-  setChip('dc-w','필수단어 '+wc+'/5',wc>=5);
-  setChip('dc-p','핵심표현 '+pc+'/3',pc>=3);
-  setChip('dc-len','단어수 '+wordCount+'/120',wordCount>=120);
-  setChip('dc-ref',refIncluded?'인용문 포함 ✓':'인용문 미포함',refIncluded);
-  draftOk=(wc>=5&&pc>=3&&wordCount>=120);
-  document.getElementById('dsub').disabled=!draftOk;
-  saveProgress();
-}
-
-function runAi(){
-  const t=document.getElementById('dta').value.trim();
-  const box=document.getElementById('dai-box');
-  const wordCount=t.split(/\s+/).filter(Boolean).length;
-  if(wordCount<50){
-    box.style.display='block';box.className='dai err';
-    box.innerHTML='<i class="ti ti-alert-circle"></i> 최소 50단어 이상 작성 후 검사하세요. (목표: 120단어)';
+  var summ=document.getElementById('dta-summ')?document.getElementById('dta-summ').value.trim():'';
+  var t=document.getElementById('dta').value;
+  var words=t.trim()?t.trim().split(/\s+/).filter(Boolean).length:0;
+  var lenOk=words>=100&&words<=200;
+  var summChip=document.getElementById('dc-summ');
+  if(summChip){
+    var summOk=summ.length>20;
+    summChip.className='dchip '+(summOk?'ok':'');
+    summChip.textContent=summOk?'요약 ✓':'요약 미작성';
+  }
+  var lenChip=document.getElementById('dc-len');
+  var labels={'dc-intro':'서론 미확인','dc-body':'본론 미확인','dc-concl':'결론 미확인','dc-gram':'문법 미확인'};
+  if(!t.trim()&&!summ){
+    Object.keys(labels).forEach(function(id){var el=document.getElementById(id);if(el){el.className='dchip';el.textContent=labels[id];}});
+    if(lenChip){lenChip.className='dchip';lenChip.textContent='길이 미확인';}
+    document.getElementById('dsub').disabled=true;
     return;
   }
-  liveChk();
-  const c=DATA.content[currentWeek]||{};
-  const KW=c.keywords||[];const PKW=c.patternKW||[];
-  const tl=t.toLowerCase();
-  const wc=KW.filter(k=>tl.includes(k)).length;
-  const pc=PKW.filter(k=>tl.includes(k)).length;
-  const q1=document.getElementById('dta-step1')?.value.trim()||'';
-  const refIncluded=q1.length>5&&tl.includes(q1.toLowerCase().substring(0,20));
-  const ok=(s)=>s?'<span style="color:#27500A;font-weight:500">✓ 충족</span>':'<span style="color:#791F1F;font-weight:500">✗ 미충족</span>';
-  box.style.display='block';
-  box.className=draftOk?'dai ok':'dai err';
-  box.innerHTML=`
-    <strong>AI 루브릭 검사 결과</strong> <span style="font-size:11px;color:inherit;font-weight:400">(${wordCount}단어)</span><br><br>
-    필수단어 활용 (5개 이상): ${ok(wc>=5)} — ${wc}개 포함<br>
-    핵심표현 활용 (3개 이상): ${ok(pc>=3)} — ${pc}개 포함<br>
-    스피치 분량 (120단어 이상): ${ok(wordCount>=120)} — ${wordCount}단어<br>
-    Step 1 인용문 포함: ${ok(refIncluded)}<br><br>
-    ${draftOk
-      ? '<strong style="color:#27500A">✓ 모든 조건 충족! 드래프트 제출 가능합니다.</strong>'
-      : '<strong style="color:#791F1F">미충족 항목을 보완 후 재검사하세요.</strong>'}`;
+  if(lenChip){
+    lenChip.className='dchip '+(lenOk?'ok':'ng');
+    lenChip.textContent='길이 '+words+'단어'+(lenOk?' ✓':(words<100?' (짧음)':' (너무 김)'));
+  }
+  document.getElementById('dsub').disabled=!(summ.length>10);
+}
+
+async function runAi(){
+  var txt=document.getElementById('dta').value.trim();
+  var summText=document.getElementById('dta-summ')?document.getElementById('dta-summ').value.trim():'';
+  if(!txt&&!summText){showToast('먼저 드래프트를 작성하세요.');return;}
+  var btn=document.querySelector('.bai');
+  btn.disabled=true;
+  btn.innerHTML='<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> AI 분석 중...';
+  var box=document.getElementById('dai-box');
+  box.style.display='block';box.className='dai ok';
+  box.innerHTML='<span style="display:flex;align-items:center;gap:6px"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> AI가 스피치 구조를 분석하고 있습니다...</span>';
+  var chipIds=['dc-summ','dc-intro','dc-body','dc-concl','dc-gram','dc-len'];
+  var chipLabels={'dc-summ':'요약 미확인','dc-intro':'서론 미확인','dc-body':'본론 미확인','dc-concl':'결론 미확인','dc-gram':'문법 미확인','dc-len':'길이 미확인'};
+  chipIds.forEach(function(id){var el=document.getElementById(id);if(el){el.className='dchip';el.textContent='분석 중...';} });
+  var words=txt.split(/\s+/).filter(Boolean).length;
+  var sampleJson='{"summary":{"score":0,"label":"낭독문 요약","ok":false,"feedback":""},"intro":{"score":0,"label":"서론","ok":false,"feedback":""},"body":{"score":0,"label":"본론","ok":false,"feedback":""},"conclusion":{"score":0,"label":"결론","ok":false,"feedback":""},"grammar":{"score":0,"label":"문법","ok":false,"feedback":""},"length":{"score":0,"label":"길이","ok":false,"feedback":""},"total":0,"overall":""}';
+  var promptText='You are a KMA English speech coach. A cadet wrote a 2-part draft.\n'
+    +'Evaluate on 6 criteria. Respond ONLY in valid JSON (no markdown):\n'
+    +sampleJson+'\n\n'
+    +'Criteria:\n'
+    +'- summary(0-2): Does Part1 capture the key message and include a quoted sentence? ok=score>=1\n'
+    +'- intro(0-2): Clear opening hook in Part2? ok=score>=1\n'
+    +'- body(0-4): 2-3 logical points connected to studied speech? ok=score>=2\n'
+    +'- conclusion(0-2): Clear closing that reinforces the message? ok=score>=1\n'
+    +'- grammar(0-4): 4=no errors,3=minor,2=several,1=many,0=severe. ok=score>=2\n'
+    +'- length(0-4): Word count='+words+'. Ideal 120-150w for 1min. 4=120-150,3=100-170,2=80-100or170-200,1=<80or>200. ok=score>=3\n'
+    +'- total: sum(max 16)\n'
+    +'- feedback: 1-2 Korean sentences each\n'
+    +'- overall: 2-3 Korean sentence summary with memorization advice\n\n'
+    +(summText?'Part1 Summary: '+summText+' ':'')
+    +'Part2 Speech: '+txt;
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:promptText}]})
+    });
+    var data=await res.json();
+    var raw=data.content.map(function(b){return b.text||'';}).join('').replace(/```json|```/g,'').trim();
+    var r=JSON.parse(raw);
+    var chipMap={'dc-summ':r.summary,'dc-intro':r.intro,'dc-body':r.body,'dc-concl':r.conclusion,'dc-gram':r.grammar,'dc-len':r.length};
+    Object.entries(chipMap).forEach(function(entry){
+      var id=entry[0],item=entry[1];
+      var el=document.getElementById(id);
+      if(el){el.className='dchip '+(item.ok?'ok':'ng');el.textContent=item.label+' '+(item.ok?'✓':'✗');}
+    });
+    var total=r.total;var pct=Math.round(total/16*100);
+    var grade=pct>=90?'우수':pct>=75?'양호':pct>=60?'보통':'보완 필요';
+    var gc=pct>=90?'var(--gn-tx)':pct>=75?'var(--bl-tx)':pct>=60?'var(--or-tx)':'var(--rd-tx)';
+    var sColor=function(s,m){var p=Math.round(s/m*100);return p>=80?'#639922':p>=60?'#BA7517':'#A32D2D';};
+    var bPct=function(s,m){return Math.round(s/m*100);};
+    var html2='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:0.5px solid #B5D4F4">'
+      +'<span style="font-size:13px;font-weight:700">AI 루브릭 검사 결과</span>'
+      +'<span style="font-size:20px;font-weight:700;color:'+gc+'">'+total
+      +'<span style="font-size:11px;font-weight:400;color:var(--tx3)">/16</span>'
+      +'<span style="font-size:11px;font-weight:700;margin-left:5px;color:'+gc+'">'+grade+'</span></span></div>';
+    var items=[r.summary,r.intro,r.body,r.conclusion,r.grammar,r.length];
+    var maxes=[2,2,4,2,4,4];
+    items.forEach(function(item,i){
+      if(!item)return;
+      var bc=sColor(item.score,maxes[i]);var bp=bPct(item.score,maxes[i]);
+      html2+='<div style="margin-bottom:8px">'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:3px">'
+        +'<span style="font-size:12px;font-weight:500">'+item.label+'</span>'
+        +'<span style="font-size:11px;font-weight:500;color:'+bc+'">'+item.score+'/'+maxes[i]+'</span></div>'
+        +'<div style="background:var(--bg);border-radius:20px;height:5px;overflow:hidden;margin-bottom:4px">'
+        +'<div style="height:100%;width:'+bp+'%;background:'+bc+';border-radius:20px;transition:width .5s"></div></div>'
+        +'<div style="font-size:11px;color:var(--tx2);line-height:1.5">'+item.feedback+'</div></div>';
+    });
+    html2+='<div style="background:var(--bg3);border-radius:var(--r8);padding:8px 12px;margin-top:6px;font-size:12px;color:var(--tx2);line-height:1.7;border:0.5px solid var(--bd)"><strong>총평:</strong> '+r.overall+'</div>';
+    box.className='dai ok';box.innerHTML=html2;
+    document.getElementById('dsub').disabled=false;
+    showToast('AI 분석 완료! '+total+'/16점');
+  }catch(e){
+    box.className='dai err';
+    box.innerHTML='<i class="ti ti-alert-circle"></i> AI 분석 중 오류가 발생했습니다. 다시 시도해 주세요.';
+    chipIds.forEach(function(id){var el=document.getElementById(id);if(el){el.className='dchip';el.textContent=chipLabels[id];}});
+    showToast('오류 발생. 다시 시도하세요.');
+  }
+  btn.disabled=false;
+  btn.innerHTML='<i class="ti ti-robot"></i> AI 루브릭 검사';
 }
 
 function submitDraft(silent){
