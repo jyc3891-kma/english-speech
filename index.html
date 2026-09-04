@@ -2512,8 +2512,11 @@ function renderGradeTable(){
     const tr=document.createElement('tr');
     const wkCells=weeks.map(w=>{
       const sc=(c.scores&&c.scores[w.id]!=null)?c.scores[w.id]:'';
-      const submittedMark=(c.submissions&&c.submissions[w.id]&&c.submissions[w.id].final_submitted)?' style="border:1px solid #97C459"':'';
-      return `<td><input class="score-inp"${submittedMark} type="number" min="0" max="28" value="${sc}" placeholder="-" data-cadet="${esc(c.name)}" data-week="${w.id}" oninput="setScore(this)"></td>`;
+      const sub=c.submissions&&c.submissions[w.id];
+      const submittedMark=(sub&&sub.final_submitted)?' style="border:1px solid #97C459"':'';
+      const draftIco=(sub&&sub.draft_text)?`<button onclick='showDraftPopup(${JSON.stringify(c.name)},"${w.id}")' title="드래프트 보기" style="background:none;border:none;color:var(--bl);cursor:pointer;font-size:12px;padding:0 2px"><i class="ti ti-file-text"></i></button>`:'';
+      const playIco=(sub&&sub.audio_url)?`<a href="${sub.audio_url}" target="_blank" title="녹음 듣기" style="color:var(--gn-tx);font-size:12px;text-decoration:none;padding:0 2px"><i class="ti ti-player-play-filled"></i></a>`:'';
+      return `<td><input class="score-inp"${submittedMark} type="number" min="0" max="28" value="${sc}" placeholder="-" data-cadet="${esc(c.name)}" data-week="${w.id}" oninput="setScore(this)"><div style="display:flex;justify-content:center;gap:3px;margin-top:2px">${draftIco}${playIco}</div></td>`;
     }).join('');
     const total=weeks.reduce((s,w)=>s+((c.scores&&c.scores[w.id]!=null)?Number(c.scores[w.id]):0),0);
     const hasAny=weeks.some(w=>c.scores&&c.scores[w.id]!=null);
@@ -2527,6 +2530,11 @@ function renderGradeTable(){
   });
 }
 
+function showDraftPopup(name,wid){
+  const c=(instEditData.cadets||[]).find(x=>x.name===name);
+  const sub=c&&c.submissions&&c.submissions[wid];
+  alert((name+' — 드래프트\n\n')+(sub&&sub.draft_text?sub.draft_text:'(내용 없음)'));
+}
 let _scoreTimer=null;
 function setScore(elm){
   const name=elm.dataset.cadet, wid=elm.dataset.week, val=elm.value;
