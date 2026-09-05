@@ -2063,7 +2063,35 @@ function renderCard(){
   document.getElementById('fc-front-btns').style.display='flex';
   document.getElementById('fc-back-btns').style.display='none';
 }
-function speakWord(){const w=WORDS[cardIdx];if(!w)return;if('speechSynthesis' in window){window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(w.w);u.lang='en-US';u.rate=0.78;window.speechSynthesis.speak(u);}showToast('발음 재생: '+w.w);}
+// ---- TTS voice selection (fixes iOS "robotic" default-voice issue) ----
+let _cachedVoice=null;
+function pickBestVoice(){
+  if(!('speechSynthesis' in window))return null;
+  const voices=window.speechSynthesis.getVoices();
+  if(!voices||!voices.length)return null;
+  if(_cachedVoice&&voices.includes(_cachedVoice))return _cachedVoice;
+  const preferredNames=['Samantha','Ava','Allison','Nicky','Susan','Karen','Google US English'];
+  let v=voices.find(v=>v.lang==='en-US'&&preferredNames.some(p=>v.name.includes(p)));
+  if(!v)v=voices.find(v=>v.lang==='en-US'&&/en-US-local|Enhanced|Premium/i.test(v.name));
+  if(!v)v=voices.find(v=>v.lang==='en-US');
+  if(!v)v=voices.find(v=>v.lang&&v.lang.startsWith('en'));
+  _cachedVoice=v||null;
+  return _cachedVoice;
+}
+if('speechSynthesis' in window){
+  window.speechSynthesis.onvoiceschanged=()=>{_cachedVoice=null;pickBestVoice();};
+  pickBestVoice();
+}
+function speakText(text,rate){
+  if(!('speechSynthesis' in window)){showToast('이 브라우저는 음성 재생을 지원하지 않습니다');return;}
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';u.rate=rate||0.75;
+  const v=pickBestVoice();
+  if(v)u.voice=v;
+  window.speechSynthesis.speak(u);
+}
+function speakWord(){const w=WORDS[cardIdx];if(!w)return;speakText(w.w,0.78);showToast('발음 재생: '+w.w);}
 function flipCard(){flipped=!flipped;document.getElementById('fc-front').style.display=flipped?'none':'block';document.getElementById('fc-back').style.display=flipped?'flex':'none';document.getElementById('fc-front-btns').style.display=flipped?'none':'flex';document.getElementById('fc-back-btns').style.display=flipped?'flex':'none';}
 function nextCard(){seenCount=Math.min(seenCount+1,WORDS.length);cardIdx=(cardIdx+1)%WORDS.length;renderCard();saveProgress();if(seenCount>=WORDS.length){document.getElementById('ps-v').classList.add('done');document.getElementById('pv-v').textContent='완료';}else{document.getElementById('pv-v').textContent=seenCount+'/'+WORDS.length;}}
 
@@ -2085,7 +2113,7 @@ function renderPats(){
     el.appendChild(d);if(patDone[i])showFullSentence(i,true);
   });
 }
-function speakPat(i){if('speechSynthesis' in window){window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(PATS[i].full);u.lang='en-US';u.rate=0.78;window.speechSynthesis.speak(u);}}
+function speakPat(i){speakText(PATS[i].full,0.78);}
 function chkPat(i){const inp=document.getElementById('pb-'+i);const val=inp.value.trim().toLowerCase();if(val===PATS[i].a){inp.className='p-inp c';inp.readOnly=true;document.getElementById('pf-'+i).textContent='정답!';document.getElementById('pf-'+i).className='p-fb ok';document.getElementById('pi-'+i).classList.add('ok');document.getElementById('pb-btn-'+i).disabled=true;patDone[i]=true;showFullSentence(i,true);updPat();saveProgress();}else{inp.className='p-inp w';document.getElementById('pf-'+i).textContent='오답. 다시 시도하세요.';document.getElementById('pf-'+i).className='p-fb ng';setTimeout(()=>{inp.className='p-inp';},1200);showFullSentence(i,false);}}
 function showFullSentence(i,ok){const box=document.getElementById('pf-full-'+i);const h=PATS[i].full.replace(PATS[i].a,'<span>'+PATS[i].a+'</span>');box.style.display='block';box.style.background=ok?'#EAF3DE':'#E6F1FB';box.style.color=ok?'#27500A':'#0C447C';box.innerHTML=(ok?'✓ 정답 문장: ':'정답 확인: ')+h;}
 function updPat(){const n=patDone.filter(Boolean).length;document.getElementById('pv-p').textContent=n+'/'+PATS.length;if(n>=PATS.length){document.getElementById('ps-p').classList.add('done');document.getElementById('pv-p').textContent='완료';}}
@@ -2115,7 +2143,7 @@ function renderShadow(){
   if(doneN>=SHADOWS.length){document.getElementById('ps-s').classList.add('done');document.getElementById('shadow-done-btn').disabled=false;}
   else document.getElementById('shadow-done-btn').disabled=true;
 }
-function speakShadow(i){if('speechSynthesis' in window){window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(SHADOWS[i].en);u.lang='en-US';u.rate=0.75;window.speechSynthesis.speak(u);}}
+function speakShadow(i){speakText(SHADOWS[i].en,0.75);}
 function toggleSRec(i){
   if(shdwDone[i])return;
   if(shdwRec[i]){if(window._sRec)try{window._sRec.stop();}catch(e){}shdwRec[i]=false;renderShadow();return;}
@@ -2291,7 +2319,8 @@ async function submitFinal(){
     saveProgress();
   }catch(e){
     console.error(e);
-    showToast('업로드 실패 — 인터넷 연결을 확인하고 다시 시도하세요');
+    const detail=(e&&(e.message||e.error_description||e.statusText))||'알 수 없는 오류';
+    showToast('업로드 실패: '+detail);
     document.getElementById('final-sub').disabled=false;
   }
 }
