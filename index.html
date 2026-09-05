@@ -2302,7 +2302,9 @@ async function submitFinal(){
   showToast('업로드 중...');
   try{
     const ext=(audioMime.includes('mp4'))?'m4a':(audioMime.includes('ogg')?'ogg':'webm');
-    const path=`${currentWeek}/${encodeURIComponent(cadetName)}_${Date.now()}.${ext}`;
+    const safeWeek=String(currentWeek).replace(/[^a-zA-Z0-9_\-]/g,'')||'week';
+    const uid=Date.now()+'_'+Math.random().toString(36).slice(2,8);
+    const path=`${safeWeek}/${uid}.${ext}`;
     const {error:upErr}=await sb.storage.from('recordings').upload(path,audioBlob,{contentType:audioMime||'audio/webm',upsert:true});
     if(upErr)throw upErr;
     const {data:pub}=sb.storage.from('recordings').getPublicUrl(path);
