@@ -1890,18 +1890,11 @@ function confirmGate(){
 
 // ==================== CADET NAME ====================
 function initAfterGate(){
-  const savedContent=localStorage.getItem('kma_data');
-  if(savedContent){
-    try{
-      const sd=JSON.parse(savedContent);
-      if(sd._v===CONTENT_VERSION){
-        if(sd.content)DATA.content=sd.content;
-        if(sd.weeks)DATA.weeks=sd.weeks;
-      } else {
-        localStorage.removeItem('kma_data');
-      }
-    }catch(e){localStorage.removeItem('kma_data');}
-  }
+  // NOTE: 예전 버전은 여기서 localStorage('kma_data')에 저장된 스냅샷으로
+  // DATA.content/DATA.weeks를 덮어썼습니다. 그 스냅샷이 오래되거나 비어있으면
+  // 코드를 아무리 새로 배포해도 화면에 반영되지 않는 문제가 있어 제거했습니다.
+  // 이제 항상 이 파일에 들어있는 최신 DATA를 그대로 사용합니다.
+  localStorage.removeItem('kma_data');
   const sp=localStorage.getItem('kma_progress');
   if(sp){try{progressStore=JSON.parse(sp)||{};}catch(e){progressStore={};}}
   buildWeekSel();
@@ -2474,9 +2467,8 @@ function ensureContent(wid){if(!instEditData.content[wid])instEditData.content[w
 function saveInst(){
   DATA.weeks=JSON.parse(JSON.stringify(instEditData.weeks));
   DATA.content=JSON.parse(JSON.stringify(instEditData.content));
-  try{localStorage.setItem('kma_data',JSON.stringify({_v:CONTENT_VERSION,weeks:DATA.weeks,content:DATA.content}));}catch(e){}
   buildWeekSel();loadWeek(DATA.weeks[0].id);
-  showToast('저장 완료! 앱에 반영되었습니다');closeInst();
+  showToast('저장 완료! (이 브라우저 미리보기용 \u2014 학생들에게 반영하려면 코드 자체를 배포해야 합니다)');closeInst();
 }
 function exportInst(){
   const blob=new Blob([JSON.stringify(instEditData,null,2)],{type:'application/json'});
