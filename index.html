@@ -2132,7 +2132,7 @@ function renderShadow(){
   });
   const doneN=shdwDone.filter(Boolean).length;
   const avg=doneN>0?Math.round(shdwAcc.filter((_,i)=>shdwDone[i]).reduce((a,b)=>a+b,0)/doneN):0;
-  document.getElementById('pv-s').textContent=doneN>0?(doneN===SHADOWS.length?'평균 '+avg+'%':doneN+'/'+SHADOWS.length+' 완료'):'미완료';
+  document.getElementById('pv-s').textContent=doneN>0?(doneN===SHADOWS.length?'완료 · 평균 '+avg+'%':doneN+'/'+SHADOWS.length+' 완료'):'미완료';
   if(doneN>=SHADOWS.length){document.getElementById('ps-s').classList.add('done');document.getElementById('shadow-done-btn').disabled=false;}
   else document.getElementById('shadow-done-btn').disabled=true;
 }
